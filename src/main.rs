@@ -1,12 +1,15 @@
-use std::{env::var, mem::{forget, transmute}, slice::from_raw_parts};
+use std::{collections::HashMap, env::var, mem::{forget, transmute}, slice::from_raw_parts};
 
 use tl::{Parser, ParserOptions};
+use tokio::time::Instant;
 use tracing::info;
+use std::borrow::Cow;
 
-use crate::http::{HttpClient, Str};
+use crate::{http::{HttpClient, Str}, parser::parse_changes};
 
 mod http;
 mod errors;
+mod parser;
 
 #[tokio::main]
 async fn main() {
@@ -17,21 +20,11 @@ async fn main() {
     let http_client = HttpClient::new(lessons_change_page, "");
     
     let document = unsafe { http_client.get_page_document(lessons_change_page).await }.unwrap();
-    let dom = tl::parse(&document, ParserOptions::default()).unwrap();
-    
-    for node in dom.nodes() {
-        let Some(element) = node.as_tag() else {
-            continue;
-        };
-        let attributes = element.attributes();
-        let (Some(Some(class)), Some(Some(style))) = (attributes.get("class"), attributes.get("style")) else {
-            continue
-        };
-        if style.as_utf8_str().contains("width:") || !(class == "xl68" || class == "xl70") {
-            continue;
-        };
-        info!("{:?}", element.inner_text(dom.parser()));
-    }
+
+    let time = Instant::now();
+    let changes = unsafe { parse_changes(&document) };
+
+    info!("Parsed changes: {:?} in {}ns", changes, time.elapsed().as_nanos());
 }
 
 unsafe fn parse_page(env_name: &'static str) -> &'static str {
