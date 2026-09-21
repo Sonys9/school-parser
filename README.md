@@ -1,4 +1,4 @@
-# Highly optimised 419 school lessons parser with the telegram bot
+# Highly optimised school lessons parser with the telegram bot
 
 ## Why use this bot
 - It's fast.
@@ -17,7 +17,7 @@
 - [UNDONE] Connect the database for lessons history and etc.
 
 # Progress
-- It parses lessons changes!
+- It parses lessons changes in 0.72ms!
 ![Blazing](assets/blazing-changes-parser.png)
 
 ## License
