@@ -1,5 +1,7 @@
 # Highly optimised school lessons parser with the telegram bot
 
+Warning: this project is currently in deep developing. Do not use it.
+
 ## Why use this bot
 - It's fast.
 - I tried to reduce amount of allocations.
