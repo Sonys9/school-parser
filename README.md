@@ -1,14 +1,24 @@
 # Highly optimised 419 school lessons parser with the telegram bot
 
-## Why use this bot:
+## Why use this bot
 - It's fast.
 - I tried to reduce amount of allocations.
 - It automaticly notifies everyone when new lessons are dropped.
 
-## What's used:
+## What's used
 - Teloxide: the best telegram bot crate for rust.
 - Reqwest: for fetching the pages.
 - And other crates for internal work.
+
+# Roadmap
+- [DONE] Make blazing lessons changes parser
+- [UNDONE] Make the lessons parser
+- [UNDONE] Make the telegram bot
+- [UNDONE] Connect the database for lessons history and etc.
+
+# Progress
+- It parses lessons changes!
+![Blazing](assets/blazing-changes-parser.png)
 
 ## License
 
