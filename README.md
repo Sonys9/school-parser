@@ -19,10 +19,6 @@ Warning: this project is currently in deep developing. Do not use it.
 - [UNDONE] Make the telegram bot
 - [UNDONE] Connect the database for lessons history and etc.
 
-# Progress
-- It parses lessons changes in 0.72ms!
-![Blazing](assets/blazing-changes-parser.png)
-
 ## License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
