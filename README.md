@@ -8,8 +8,9 @@ Warning: this project is currently in deep developing. Do not use it.
 - It automaticly notifies everyone when new lessons are dropped.
 
 ## What's used
-- Teloxide: the best telegram bot crate for rust.
+- Telers: the best telegram bot crate for rust.
 - Reqwest: for fetching the pages.
+- Tl: for parsing HTML
 - And other crates for internal work.
 
 # Roadmap
