@@ -10,18 +10,18 @@ pub struct HttpClient {
 }
 
 impl HttpClient {
-    pub fn new(
-        lessons_change_page: &'static str,
-        lessons_page: &'static str,
-    ) -> Self {
-        Self { lessons_change_page, lessons_page }
+    pub fn new(lessons_change_page: &'static str, lessons_page: &'static str) -> Self {
+        Self {
+            lessons_change_page,
+            lessons_page,
+        }
     }
 
-    pub async unsafe fn get_page_document<'b, 'a: 'b>(&self, page: &'static str) -> Result<Str<'b, 'a>, Error> {
-        let document_bytes = reqwest::get(page)
-            .await?
-            .bytes()
-            .await?;
+    pub async unsafe fn get_page_document<'b, 'a: 'b>(
+        &self,
+        page: &'static str,
+    ) -> Result<Str<'b, 'a>, Error> {
+        let document_bytes = reqwest::get(page).await?.bytes().await?;
 
         unsafe { Str::new(document_bytes) }
     }
@@ -31,7 +31,7 @@ impl HttpClient {
 pub struct Str<'b, 'a: 'b> {
     slice: &'a [u8],
     str: &'b str,
-    ptr: *mut u8
+    ptr: *mut u8,
 }
 
 impl<'b, 'a: 'b> Str<'a, 'b> {
@@ -42,7 +42,11 @@ impl<'b, 'a: 'b> Str<'a, 'b> {
         unsafe {
             let slice = from_raw_parts(ptr, len);
             let str = str::from_utf8(slice)?;
-            Ok(Self { slice, str, ptr: ptr as *mut u8 })
+            Ok(Self {
+                slice,
+                str,
+                ptr: ptr as *mut u8,
+            })
         }
     }
 }
