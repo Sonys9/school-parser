@@ -30,3 +30,12 @@ This project is **Free Software**: you can share it, modify it, and reuse it.
 * **Permissions**: Commercial use, modification, distribution, patent use, and private use.
 * **Conditions**: You must include a copy of the original license and copyright notice. Any modifications or larger works derived from this code **must also be licensed under the GPLv3** and made open source.
 * **Limitations**: Provides no warranty or liability.
+
+## Contributing
+Please read CONTRIBUTING.md for details on our code of conduct and the process for submitting pull requests.
+
+## Code of Conduct
+This project adheres to a Code of Conduct. By participating, you are expected to uphold this code.
+
+## Security
+For security concerns, please refer to our Security Policy.
