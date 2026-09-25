@@ -41,26 +41,72 @@ impl<'a> Parser<'a> {
                 continue;
             };
             let columns = self.columns(colgroup.unwrap());
-            changes.push(self.table(tbody.unwrap(), columns));
+            changes.extend(self.table(tbody.unwrap(), columns).drain(..));
         }
         changes
     }
 
-    fn table(&self, tbody: &'a HTMLTag<'a>, columns: usize) -> Change<'_> {
-        let mut change = Change::new(columns);
-        
-        let mut elements = elements!(self, tbody, "tr");
-        if let Some(tr) = elements.next() {
-            let title = self.parse_title(tr);
-            change.title = Some(title);
-        };
-
-        for row in elements {
-            for td in elements!(self, row, "td") {
-                change.change_data.push(td.inner_text(self.dom.parser()));
+    fn table<'b>(&'a self, tbody: &'b HTMLTag<'a>, columns: usize) -> Vec<Change<'a>> {
+        let mut stops: Vec<(usize, Cow<'a, str>)> = Vec::with_capacity(16);
+        let mut i = 0;
+        'tr_loop: for tr in elements!(self, tbody, "tr") {
+            i += 1;
+            for td in elements!(self, tr, "td") {
+                let Some(Some(span)) = self
+                    .find_child(td, "span")
+                    .map(
+                        |element| 
+                        self.find_child(element, "span")
+                    ) else 
+                {
+                    continue 'tr_loop;
+                };
+                let table_type = match span.attributes().get("style").flatten().map(|bytes| str::from_utf8(bytes.as_bytes())) {
+                    Some(Ok("color:red")) => "Changes",
+                    Some(Ok("font-family:Cambria,serif")) => "Olympiad",
+                    _ => continue 'tr_loop
+                };
+                if let Some(&mut (ref mut last_i, _)) = stops.last_mut() {
+                    *last_i = i;
+                };
+                stops.push((999, self.title(tr)));
             };
         };
-        change
+
+        info!("{:?}", stops);
+
+        let mut elements = elements!(self, tbody, "tr");
+        let mut changes: Vec<Change> = Vec::with_capacity(stops.len());
+
+        let mut last_row: usize = 0;
+        for (i, (row, title)) in stops.into_iter().enumerate() {
+            changes.push(Change::new(columns, title));
+            self.tbody(&mut elements, &mut changes[i], row, last_row);
+            last_row = row;
+        };
+
+        changes
+    }
+
+    fn tbody<'b>(&'a self, elements: &mut impl Iterator<Item = &'a HTMLTag<'a>>, change: &'b mut Change<'a>, stop_at: usize, mut i: usize) {
+        let mut temp_change = Vec::with_capacity(6);
+        for row in elements {
+            info!("{} {} {}", i, stop_at, i == stop_at);
+            if i == stop_at {
+                info!("stopping at {}", i);
+                break;
+            };
+            let mut is_empty = true;
+            for td in elements!(self, row, "td") {
+                let text = td.inner_text(self.dom.parser());
+                is_empty = !(text != "&nbsp;" || !is_empty);
+                temp_change.push(text);
+            };
+            if !is_empty {
+                change.change_data.extend(temp_change.drain(..));
+            }
+            i += 1;
+        };
     }
 
     fn columns(&self, colgroup: &'a HTMLTag<'a>) -> usize {
@@ -94,7 +140,19 @@ impl<'a> Parser<'a> {
             .filter_map(|node| node.as_tag())
     }
 
-    fn parse_title(&self, tr: &'a HTMLTag<'a>) -> Cow<'a, str> {
+    fn find_child<'b>(&'a self, element: &'b HTMLTag<'a>, name: &str) -> Option<&'b HTMLTag<'a>> {
+        element
+            .children()
+            .all(self.dom.parser())
+            .iter()
+            .filter_map(|node| node.as_tag())
+            .find(
+                |element| 
+                element.name() == name
+            )
+    }
+
+    fn title(&self, tr: &'a HTMLTag<'a>) -> Cow<'a, str> {
         let mut result = String::with_capacity(tr.inner_text(self.dom.parser()).len());
         for td in elements!(self, tr, "td") {
             let text = td.inner_text(self.dom.parser());
@@ -158,15 +216,15 @@ pub struct Change<'a> {
     //pub change_data: FxHashMap<Cow<'b, str>, Vec<Cow<'c, str>>>,
     pub column_len: usize,
     pub change_data: Vec<Cow<'a, str>>,
-    pub title: Option<Cow<'a, str>>,
+    pub title: Cow<'a, str>,
 }
 
 impl<'a> Change<'a> {
-    pub fn new(column_len: usize) -> Self {
+    pub fn new(column_len: usize, title: Cow<'a, str>) -> Self {
         Self {
             column_len,
-            change_data: Vec::new(),
-            title: None,
+            change_data: Vec::with_capacity(32),
+            title,
         }
     }
 }
