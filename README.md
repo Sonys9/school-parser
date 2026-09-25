@@ -14,9 +14,11 @@ Warning: this project is currently in deep developing. Do not use it.
 - And other crates for internal work.
 
 # Roadmap
+- [UNDONE] Do everything very optimized
 - [DONE] Make blazing lessons changes parser
 - [UNDONE] Make the lessons parser
-- [UNDONE] Make the telegram bot
+- [DONE] Move to lol_html after building everything
+- [UNDONE] Make the telegram bot without any crates
 - [UNDONE] Connect the database for lessons history and etc.
 
 ## License
