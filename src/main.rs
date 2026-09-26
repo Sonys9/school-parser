@@ -32,6 +32,7 @@ async fn main() {
 
     let parser = Parser::new(&document);
     let changes = parser.changes();
+    drop(profiler);
 
     info!(
         "Parsed changes: {:?} in {}ns",
@@ -39,7 +40,15 @@ async fn main() {
         time.elapsed().as_nanos()
     );
 
-    drop(profiler);
+    for change in changes {
+        println!("{}", change.title);
+        for row in change.change_data {
+            for block in row {
+                print!("{}\t", block);
+            }
+            println!();
+        }
+    }
 }
 
 unsafe fn parse_page(env_name: &'static str) -> &'static str {

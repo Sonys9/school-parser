@@ -7,126 +7,31 @@
 "tu": "µs",
 "Mtu": "s",
 "tuth": 10,
-"cmd": "target/release/schoolbot",
-"pid": 4521,
-"tg": 2965,
-"te": 3041,
+"cmd": "./target/release/schoolbot",
+"pid": 16510,
+"tg": 2018,
+"te": 2041,
 "pps": [
 {
-"tb": 1184,
-"tbk": 8,
-"tl": 15613,
-"mb": 888,
+"tb": 3456,
+"tbk": 6,
+"tl": 1560,
+"mb": 3456,
 "mbk": 6,
-"gb": 888,
+"gb": 3456,
 "gbk": 6,
-"eb": 888,
+"eb": 3456,
 "ebk": 6,
 "fs": [
 1,
 2,
-3,
-4,
-5
-]
-},
-{
-"tb": 1024,
-"tbk": 1,
-"tl": 887,
-"mb": 1024,
-"mbk": 1,
-"gb": 1024,
-"gbk": 1,
-"eb": 1024,
-"ebk": 1,
-"fs": [
-1,
-6,
-7,
-8,
-9,
-10,
-11,
-12,
-13,
-14
-]
-},
-{
-"tb": 18204,
-"tbk": 405,
-"tl": 228349,
-"mb": 9828,
-"mbk": 121,
-"gb": 9828,
-"gbk": 121,
-"eb": 9828,
-"ebk": 121,
-"fs": [
-1,
-15,
-16,
-4,
-5
-]
-},
-{
-"tb": 18432,
-"tbk": 13,
-"tl": 3055,
-"mb": 11520,
-"mbk": 6,
-"gb": 11520,
-"gbk": 6,
-"eb": 11520,
-"ebk": 6,
-"fs": [
-1,
-17,
-14
-]
-},
-{
-"tb": 36,
-"tbk": 2,
-"tl": 2762,
-"mb": 24,
-"mbk": 1,
-"gb": 24,
-"gbk": 1,
-"eb": 24,
-"ebk": 1,
-"fs": [
-1,
-15,
-18,
-4,
-5
-]
-},
-{
-"tb": 684,
-"tbk": 21,
-"tl": 18794,
-"mb": 396,
-"mbk": 9,
-"gb": 396,
-"gbk": 9,
-"eb": 396,
-"ebk": 9,
-"fs": [
-1,
-15,
-19,
-4,
-5
+3
 ]
 },
 {
 "tb": 596,
 "tbk": 6,
-"tl": 4423,
+"tl": 2275,
 "mb": 596,
 "mbk": 6,
 "gb": 596,
@@ -135,178 +40,14 @@
 "ebk": 6,
 "fs": [
 1,
-20,
-14
-]
-},
-{
-"tb": 1550,
-"tbk": 24,
-"tl": 18,
-"mb": 176,
-"mbk": 1,
-"gb": 0,
-"gbk": 0,
-"eb": 0,
-"ebk": 0,
-"fs": [
-1,
-21,
-22,
-23,
-14
-]
-},
-{
-"tb": 16376,
-"tbk": 11,
-"tl": 75,
-"mb": 8192,
-"mbk": 1,
-"gb": 8192,
-"gbk": 1,
-"eb": 8192,
-"ebk": 1,
-"fs": [
-1,
-24,
-25,
-26,
-27,
-28,
-29,
-30,
-11,
-12
-]
-},
-{
-"tb": 1024,
-"tbk": 2,
-"tl": 723,
-"mb": 512,
-"mbk": 1,
-"gb": 0,
-"gbk": 0,
-"eb": 0,
-"ebk": 0,
-"fs": [
-1,
-31,
-14
-]
-},
-{
-"tb": 240,
-"tbk": 4,
-"tl": 2739,
-"mb": 128,
-"mbk": 1,
-"gb": 128,
-"gbk": 1,
-"eb": 128,
-"ebk": 1,
-"fs": [
-1,
-32,
-33,
-5
-]
-},
-{
-"tb": 48,
-"tbk": 2,
-"tl": 3000,
-"mb": 32,
-"mbk": 1,
-"gb": 32,
-"gbk": 1,
-"eb": 32,
-"ebk": 1,
-"fs": [
-1,
-34,
-35,
-36,
 4,
-5
-]
-},
-{
-"tb": 672,
-"tbk": 2,
-"tl": 225,
-"mb": 448,
-"mbk": 1,
-"gb": 448,
-"gbk": 1,
-"eb": 448,
-"ebk": 1,
-"fs": [
-1,
-37,
-38,
-39,
-40,
-14
-]
-},
-{
-"tb": 560,
-"tbk": 2,
-"tl": 5755,
-"mb": 560,
-"mbk": 2,
-"gb": 560,
-"gbk": 2,
-"eb": 560,
-"ebk": 2,
-"fs": [
-1,
-2,
-41,
-42,
-43,
-4,
-5
-]
-},
-{
-"tb": 1440,
-"tbk": 8,
-"tl": 308,
-"mb": 288,
-"mbk": 1,
-"gb": 0,
-"gbk": 0,
-"eb": 0,
-"ebk": 0,
-"fs": [
-1,
-44,
-14
-]
-},
-{
-"tb": 336,
-"tbk": 2,
-"tl": 525,
-"mb": 224,
-"mbk": 1,
-"gb": 0,
-"gbk": 0,
-"eb": 0,
-"ebk": 0,
-"fs": [
-1,
-45,
-14
+3
 ]
 },
 {
 "tb": 2751840,
 "tbk": 12,
-"tl": 1192,
+"tl": 840,
 "mb": 1376256,
 "mbk": 1,
 "gb": 1376256,
@@ -315,62 +56,269 @@
 "ebk": 1,
 "fs": [
 1,
-34,
-46,
-47,
-4,
-5
+5,
+6,
+7,
+8,
+9,
+10
+]
+},
+{
+"tb": 1550,
+"tbk": 24,
+"tl": 25,
+"mb": 176,
+"mbk": 1,
+"gb": 0,
+"gbk": 0,
+"eb": 0,
+"ebk": 0,
+"fs": [
+1,
+11,
+12,
+13,
+3
+]
+},
+{
+"tb": 36,
+"tbk": 2,
+"tl": 1804,
+"mb": 24,
+"mbk": 1,
+"gb": 24,
+"gbk": 1,
+"eb": 24,
+"ebk": 1,
+"fs": [
+1,
+14,
+15,
+8,
+9,
+10
+]
+},
+{
+"tb": 1280,
+"tbk": 2,
+"tl": 532,
+"mb": 640,
+"mbk": 1,
+"gb": 640,
+"gbk": 1,
+"eb": 0,
+"ebk": 0,
+"fs": [
+1,
+16,
+3
+]
+},
+{
+"tb": 560,
+"tbk": 2,
+"tl": 3774,
+"mb": 560,
+"mbk": 2,
+"gb": 560,
+"gbk": 2,
+"eb": 560,
+"ebk": 2,
+"fs": [
+1,
+17,
+18,
+19,
+20,
+8,
+9,
+10
+]
+},
+{
+"tb": 1184,
+"tbk": 8,
+"tl": 10314,
+"mb": 888,
+"mbk": 6,
+"gb": 888,
+"gbk": 6,
+"eb": 888,
+"ebk": 6,
+"fs": [
+1,
+17,
+21,
+8,
+9,
+10
+]
+},
+{
+"tb": 240,
+"tbk": 4,
+"tl": 1791,
+"mb": 128,
+"mbk": 1,
+"gb": 128,
+"gbk": 1,
+"eb": 128,
+"ebk": 1,
+"fs": [
+1,
+22,
+23,
+9,
+10
+]
+},
+{
+"tb": 684,
+"tbk": 21,
+"tl": 12458,
+"mb": 396,
+"mbk": 9,
+"gb": 396,
+"gbk": 9,
+"eb": 396,
+"ebk": 9,
+"fs": [
+1,
+14,
+24,
+8,
+9,
+10
+]
+},
+{
+"tb": 48,
+"tbk": 2,
+"tl": 2003,
+"mb": 32,
+"mbk": 1,
+"gb": 32,
+"gbk": 1,
+"eb": 32,
+"ebk": 1,
+"fs": [
+1,
+5,
+25,
+26,
+8,
+9,
+10
+]
+},
+{
+"tb": 18204,
+"tbk": 405,
+"tl": 155362,
+"mb": 9828,
+"mbk": 121,
+"gb": 9828,
+"gbk": 121,
+"eb": 9828,
+"ebk": 121,
+"fs": [
+1,
+14,
+27,
+8,
+9,
+10
+]
+},
+{
+"tb": 10368,
+"tbk": 72,
+"tl": 15050,
+"mb": 9216,
+"mbk": 64,
+"gb": 9216,
+"gbk": 64,
+"eb": 9216,
+"ebk": 64,
+"fs": [
+1,
+28,
+3
+]
+},
+{
+"tb": 672,
+"tbk": 2,
+"tl": 20,
+"mb": 448,
+"mbk": 1,
+"gb": 224,
+"gbk": 1,
+"eb": 448,
+"ebk": 1,
+"fs": [
+1,
+29,
+30,
+31,
+32,
+3
+]
+},
+{
+"tb": 336,
+"tbk": 2,
+"tl": 347,
+"mb": 224,
+"mbk": 1,
+"gb": 224,
+"gbk": 1,
+"eb": 0,
+"ebk": 0,
+"fs": [
+1,
+33,
+3
 ]
 }
 ],
 "ftbl": [
 "[root]",
-"0x555faa22540c: <dhat::Alloc as core::alloc::global::GlobalAlloc>::alloc (???:0:0)",
-"0x555faa1eefc8: <hashbrown::raw::RawTableInner>::fallible_with_capacity::<alloc::alloc::Global> (???:0:0)",
-"0x555faa1f2481: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x555faa1f3460: tl::parse (???:0:0)",
-"0x555fa9dfd0ec: <tokio::runtime::park::CachedParkThread>::block_on::<schoolbot::main::{closure#0}> (???:0:0)",
-"0x555faa27535e: <std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<alloc::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::initialize<<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<alloc::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::get_or_init<std::io::stdio::stdout::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} (???:0:0)",
-"0x555faa279e79: <std::sys::sync::once::futex::Once>::call (???:0:0)",
-"0x555faa2638f9: <std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<alloc::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::initialize::<<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<alloc::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::get_or_init<std::io::stdio::stdout::{closure#0}>::{closure#0}, !> (???:0:0)",
-"0x555faa28c2bb: std::io::stdio::stdout (???:0:0)",
-"0x555fa9e15e90: <std::thread::local::LocalKey<core::cell::RefCell<alloc::string::String>>>::with::<<tracing_subscriber::fmt::fmt_layer::Layer<tracing_subscriber::registry::sharded::Registry> as tracing_subscriber::layer::Layer<tracing_subscriber::registry::sharded::Registry>>::on_event::{closure#0}, ()> (???:0:0)",
-"0x555fa9e158cf: <tracing_subscriber::layer::layered::Layered<tracing_subscriber::filter::targets::Targets, tracing_subscriber::fmt::Subscriber> as tracing_core::subscriber::Subscriber>::event (???:0:0)",
-"0x555faa1f6421: <tracing_core::event::Event>::dispatch (???:0:0)",
-"0x555fa9df6835: <schoolbot::parser::Parser>::changes (???:0:0)",
-"0x555fa9dfd124: <tokio::runtime::park::CachedParkThread>::block_on::<schoolbot::main::{closure#0}> (???:0:0)",
-"0x555faa1f40ad: <tl::inline::vec::InlineVecInner<tl::parser::handle::NodeHandle, 2>>::push (???:0:0)",
-"0x555faa1f202f: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x555fa9df6a14: <schoolbot::parser::Parser>::changes (???:0:0)",
-"0x555faa1f2c8f: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x555faa1f2923: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x555fa9df60dd: <schoolbot::parser::Parser>::changes (???:0:0)",
-"0x555faa2a5225: <alloc::string::String as core::convert::From<alloc::borrow::Cow<str>>>::from (???:0:0)",
-"0x555faa1f4694: <tl::parser::tag::HTMLTag>::inner_text (???:0:0)",
-"0x555fa9df60af: <schoolbot::parser::Parser>::changes (???:0:0)",
-"0x555fa9e1276d: <alloc::raw_vec::RawVecInner>::finish_grow (???:0:0)",
-"0x555fa9e12574: <alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global> (???:0:0)",
-"0x555fa9e150b3: <alloc::string::String as core::fmt::Write>::write_str (???:0:0)",
-"0x555fa9e22be8: <nu_ansi_term::style::Style>::write_prefix::<dyn core::fmt::Write> (???:0:0)",
-"0x555faa2aa3fa: core::fmt::write (???:0:0)",
-"0x555fa9e1fa50: <tracing_subscriber::fmt::format::Format as tracing_subscriber::fmt::format::FormatEvent<tracing_subscriber::registry::sharded::Registry, tracing_subscriber::fmt::format::DefaultFields>>::format_event (???:0:0)",
-"0x555fa9e15d2e: <std::thread::local::LocalKey<core::cell::RefCell<alloc::string::String>>>::with::<<tracing_subscriber::fmt::fmt_layer::Layer<tracing_subscriber::registry::sharded::Registry> as tracing_subscriber::layer::Layer<tracing_subscriber::registry::sharded::Registry>>::on_event::{closure#0}, ()> (???:0:0)",
-"0x555fa9df5d6a: <schoolbot::parser::Parser>::changes (???:0:0)",
-"0x555faa1f1cef: <tl::parser::base::Parser>::new (???:0:0)",
-"0x555faa1f3458: tl::parse (???:0:0)",
-"0x555faa1f431d: <alloc::raw_vec::RawVecInner>::finish_grow (???:0:0)",
-"0x555faa1f426a: <alloc::raw_vec::RawVec<tl::parser::handle::NodeHandle>>::grow_one (???:0:0)",
-"0x555faa1f204e: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x555fa9dfa38b: <alloc::raw_vec::RawVecInner>::finish_grow (???:0:0)",
-"0x555fa9dfa164: <alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global> (???:0:0)",
-"0x555fa9df7d8c: <alloc::vec::Vec<schoolbot::parser::Change>>::extend_trusted::<alloc::vec::drain::Drain<schoolbot::parser::Change>> (???:0:0)",
-"0x555fa9df72e9: <schoolbot::parser::Parser>::changes (???:0:0)",
-"0x555faa1edf10: <hashbrown::raw::RawTable<(tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>)>>::reserve_rehash::<hashbrown::map::make_hasher<tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>, std::hash::random::RandomState>::{closure#0}> (???:0:0)",
-"0x555faa1ef61a: <hashbrown::map::HashMap<tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>, std::hash::random::RandomState>>::insert (???:0:0)",
-"0x555faa1f23e9: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x555fa9df6b04: <schoolbot::parser::Parser>::changes (???:0:0)",
-"0x555fa9df6912: <schoolbot::parser::Parser>::changes (???:0:0)",
-"0x555faa1f41fa: <alloc::raw_vec::RawVec<tl::parser::tag::Node>>::grow_one (???:0:0)",
-"0x555faa1f1fce: <tl::parser::base::Parser>::parse (???:0:0)"
+"0x55572d51d58c: <dhat::Alloc as core::alloc::global::GlobalAlloc>::alloc (???:0:0)",
+"0x55572d0f9d3c: <schoolbot::parser::Parser>::changes (???:0:0)",
+"0x55572d0eb79f: <tokio::runtime::park::CachedParkThread>::block_on::<schoolbot::main::{closure#0}> (???:0:0)",
+"0x55572d0f94ae: <schoolbot::parser::Parser>::changes (???:0:0)",
+"0x55572d4ec49d: <alloc::raw_vec::RawVecInner>::finish_grow (???:0:0)",
+"0x55572d4ec37a: <alloc::raw_vec::RawVec<tl::parser::tag::Node>>::grow_one (???:0:0)",
+"0x55572d4ea14e: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x55572d4eb5e0: tl::parse (???:0:0)",
+"0x55572d0f8ba8: <schoolbot::parser::Parser>::new (???:0:0)",
+"0x55572d0eb78a: <tokio::runtime::park::CachedParkThread>::block_on::<schoolbot::main::{closure#0}> (???:0:0)",
+"0x55572d59d7f5: <alloc::string::String as core::convert::From<alloc::borrow::Cow<str>>>::from (???:0:0)",
+"0x55572d4ec814: <tl::parser::tag::HTMLTag>::inner_text (???:0:0)",
+"0x55572d0f947b: <schoolbot::parser::Parser>::changes (???:0:0)",
+"0x55572d4ec22d: <tl::inline::vec::InlineVecInner<tl::parser::handle::NodeHandle, 2>>::push (???:0:0)",
+"0x55572d4eae0f: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x55572d0f9142: <schoolbot::parser::Parser>::changes (???:0:0)",
+"0x55572d4e7148: <hashbrown::raw::RawTableInner>::fallible_with_capacity::<alloc::alloc::Global> (???:0:0)",
+"0x55572d4e6090: <hashbrown::raw::RawTable<(tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>)>>::reserve_rehash::<hashbrown::map::make_hasher<tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>, std::hash::random::RandomState>::{closure#0}> (???:0:0)",
+"0x55572d4e779a: <hashbrown::map::HashMap<tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>, std::hash::random::RandomState>>::insert (???:0:0)",
+"0x55572d4ea569: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x55572d4ea601: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x55572d4e9e6f: <tl::parser::base::Parser>::new (???:0:0)",
+"0x55572d4eb5d8: tl::parse (???:0:0)",
+"0x55572d4eaaa3: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x55572d4ec3ea: <alloc::raw_vec::RawVec<tl::parser::handle::NodeHandle>>::grow_one (???:0:0)",
+"0x55572d4ea1ce: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x55572d4ea1af: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x55572d0f9ec5: <schoolbot::parser::Parser>::changes (???:0:0)",
+"0x55572d0eeaeb: <alloc::raw_vec::RawVecInner>::finish_grow (???:0:0)",
+"0x55572d0ee7d4: <alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global> (???:0:0)",
+"0x55572d0ef6fc: <alloc::vec::Vec<schoolbot::parser::Change>>::extend_trusted::<alloc::vec::drain::Drain<schoolbot::parser::Change>> (???:0:0)",
+"0x55572d0fa315: <schoolbot::parser::Parser>::changes (???:0:0)",
+"0x55572d0f9c0f: <schoolbot::parser::Parser>::changes (???:0:0)"
 ]
 }

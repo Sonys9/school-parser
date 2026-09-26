@@ -1,7 +1,16 @@
-use std::{borrow::Cow, hash::BuildHasherDefault, io::{Cursor, Write}, mem::transmute, sync::Arc};
+use std::{
+    borrow::Cow,
+    hash::BuildHasherDefault,
+    io::{Cursor, Write},
+    mem::transmute,
+    sync::Arc,
+};
 
 use bytes::Buf;
-use tl::{HTMLTag, Node, NodeHandle, ParserOptions, VDom, queryselector::{QuerySelectorIterator, iterable::QueryIterable}};
+use tl::{
+    HTMLTag, Node, NodeHandle, ParserOptions, VDom,
+    queryselector::{QuerySelectorIterator, iterable::QueryIterable},
+};
 use tracing::info;
 
 macro_rules! elements {
@@ -26,17 +35,21 @@ impl<'a> Parser<'a> {
 
     pub fn changes<'h>(&self) -> Vec<Change<'_>> {
         let mut changes = Vec::new();
-        for table in elements!(self, self.dom, "table", global)
-            .skip(1)
-        {
+        for table in elements!(self, self.dom, "table", global).skip(1) {
             let (mut colgroup, mut tbody) = (None, None);
-            for child in table.children().all(self.dom.parser()).iter().map(|child| child.as_tag()).flatten() {
+            for child in table
+                .children()
+                .all(self.dom.parser())
+                .iter()
+                .map(|child| child.as_tag())
+                .flatten()
+            {
                 match child.name().as_bytes() {
                     b"colgroup" => colgroup = Some(child),
                     b"tbody" => tbody = Some(child),
-                    _ => {},
+                    _ => {}
                 };
-            };
+            }
             if colgroup.is_none() || tbody.is_none() {
                 continue;
             };
@@ -47,53 +60,70 @@ impl<'a> Parser<'a> {
     }
 
     fn table<'b>(&'a self, tbody: &'b HTMLTag<'a>, columns: usize) -> Vec<Change<'a>> {
-        let mut stops: Vec<(usize, Cow<'a, str>)> = Vec::with_capacity(16);
+        let mut stops: Vec<(usize, usize, Cow<'a, str>)> = Vec::with_capacity(16);
         let mut i = 0;
         'tr_loop: for tr in elements!(self, tbody, "tr") {
             i += 1;
             for td in elements!(self, tr, "td") {
                 let Some(Some(span)) = self
                     .find_child(td, "span")
-                    .map(
-                        |element| 
-                        self.find_child(element, "span")
-                    ) else 
-                {
+                    .map(|element| self.find_child(element, "span"))
+                else {
                     continue 'tr_loop;
                 };
-                let table_type = match span.attributes().get("style").flatten().map(|bytes| str::from_utf8(bytes.as_bytes())) {
+                let table_type = match span
+                    .attributes()
+                    .get("style")
+                    .flatten()
+                    .map(|bytes| str::from_utf8(bytes.as_bytes()))
+                {
                     Some(Ok("color:red")) => "Changes",
                     Some(Ok("font-family:Cambria,serif")) => "Olympiad",
-                    _ => continue 'tr_loop
+                    _ => continue 'tr_loop,
                 };
-                if let Some(&mut (ref mut last_i, _)) = stops.last_mut() {
+                if let Some(&mut (_, ref mut last_i, _)) = stops.last_mut() {
                     *last_i = i;
                 };
-                stops.push((999, self.title(tr)));
-            };
-        };
-
-        info!("{:?}", stops);
+                stops.push((i, 999, self.title(tr)));
+            }
+        }
 
         let mut elements = elements!(self, tbody, "tr");
         let mut changes: Vec<Change> = Vec::with_capacity(stops.len());
 
         let mut last_row: usize = 0;
-        for (i, (row, title)) in stops.into_iter().enumerate() {
+        for (i, (start, end, title)) in stops.into_iter().enumerate() {
             changes.push(Change::new(columns, title));
-            self.tbody(&mut elements, &mut changes[i], row, last_row);
-            last_row = row;
-        };
+            self.tbody(
+                columns,
+                &mut elements,
+                &mut changes[i],
+                end,
+                last_row,
+                start + 1,
+            );
+            last_row = end;
+        }
 
         changes
     }
 
-    fn tbody<'b>(&'a self, elements: &mut impl Iterator<Item = &'a HTMLTag<'a>>, change: &'b mut Change<'a>, stop_at: usize, mut i: usize) {
-        let mut temp_change = Vec::with_capacity(6);
+    fn tbody<'b>(
+        &'a self,
+        columns: usize,
+        elements: &mut impl Iterator<Item = &'a HTMLTag<'a>>,
+        change: &'b mut Change<'a>,
+        stop_at: usize,
+        mut i: usize,
+        start_at: usize,
+    ) {
         for row in elements {
-            info!("{} {} {}", i, stop_at, i == stop_at);
+            let mut temp_change = Vec::with_capacity(columns);
+            i += 1;
+            if i < start_at {
+                continue;
+            };
             if i == stop_at {
-                info!("stopping at {}", i);
                 break;
             };
             let mut is_empty = true;
@@ -101,26 +131,23 @@ impl<'a> Parser<'a> {
                 let text = td.inner_text(self.dom.parser());
                 is_empty = !(text != "&nbsp;" || !is_empty);
                 temp_change.push(text);
-            };
-            if !is_empty {
-                change.change_data.extend(temp_change.drain(..));
             }
-            i += 1;
-        };
+            if !is_empty {
+                change.change_data.push(temp_change);
+            }
+        }
     }
 
     fn columns(&self, colgroup: &'a HTMLTag<'a>) -> usize {
         elements!(self, colgroup, "col")
-            .map(
-                |column| 
-                column.attributes()
+            .map(|column| {
+                column
+                    .attributes()
                     .get("span")
                     .flatten()
-                    .and_then(|unparsed| {
-                        str::from_utf8(unparsed.as_bytes()).ok()?.parse().ok()
-                    })
+                    .and_then(|unparsed| str::from_utf8(unparsed.as_bytes()).ok()?.parse().ok())
                     .unwrap_or(1)
-            )
+            })
             .sum()
     }
 
@@ -128,7 +155,7 @@ impl<'a> Parser<'a> {
     //     self.elements_by_query(src.query_selector(self.dom.parser(), selector))
     // }
     // 😡😡😡😡😡😡😡😡😡😡😡
-    
+
     fn elements_by_query<I>(&self, query: Option<I>) -> impl Iterator<Item = &HTMLTag<'a>>
     where
         I: IntoIterator<Item = NodeHandle>,
@@ -146,10 +173,7 @@ impl<'a> Parser<'a> {
             .all(self.dom.parser())
             .iter()
             .filter_map(|node| node.as_tag())
-            .find(
-                |element| 
-                element.name() == name
-            )
+            .find(|element| element.name() == name)
     }
 
     fn title(&self, tr: &'a HTMLTag<'a>) -> Cow<'a, str> {
@@ -159,32 +183,33 @@ impl<'a> Parser<'a> {
             let mut chars = text.char_indices();
             while let Some((i, char)) = chars.next() {
                 match char {
-                    '\n' | '\t' => {},
-                    '&' if text.get(i..i+6) == Some("&nbsp;") => {
+                    '\n' | '\t' => {}
+                    '&' if text.get(i..i + 6) == Some("&nbsp;") => {
                         result.push(' ');
-                        for _ in 0..5 { chars.next(); }
-                    },
+                        for _ in 0..5 {
+                            chars.next();
+                        }
+                    }
                     _ => {
                         result.push(char);
                     }
                 };
-            };
-        };
+            }
+        }
 
         result.truncate(result.trim_end().len());
         Cow::Owned(result)
     }
 }
 
-
 /*
 Расписание:
 Считаем количество колонок в <colgroup>
 Если есть span то прибавляем значение span
 Читаем ровно столько, сколько получилось
-Структура примерного Vec: 
+Структура примерного Vec:
     [
-        "Класс", "Номер урока", ..., 
+        "Класс", "Номер урока", ...,
         "10а", "5", "Вфи", "307", None, "нет 7 ур."
     ]
 И сохраняем как (column_len, [...]) или в структуре
@@ -215,7 +240,7 @@ impl<'a> Parser<'a> {
 pub struct Change<'a> {
     //pub change_data: FxHashMap<Cow<'b, str>, Vec<Cow<'c, str>>>,
     pub column_len: usize,
-    pub change_data: Vec<Cow<'a, str>>,
+    pub change_data: Vec<Vec<Cow<'a, str>>>,
     pub title: Cow<'a, str>,
 }
 
@@ -223,7 +248,7 @@ impl<'a> Change<'a> {
     pub fn new(column_len: usize, title: Cow<'a, str>) -> Self {
         Self {
             column_len,
-            change_data: Vec::with_capacity(32),
+            change_data: Vec::with_capacity(24),
             title,
         }
     }
