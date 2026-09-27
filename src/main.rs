@@ -8,11 +8,14 @@ use dhat::{Alloc, Profiler};
 use tokio::time::Instant;
 use tracing::info;
 
-use crate::{http::HttpClient, parser::Parser};
+use crate::{
+    http::{HttpClient, Str},
+    parsers::{changes, lessons},
+};
 
 mod errors;
 mod http;
-mod parser;
+mod parsers;
 
 #[global_allocator]
 static ALLOC: Alloc = Alloc;
@@ -22,15 +25,23 @@ async fn main() {
     tracing_subscriber::fmt::init();
     dotenvy::dotenv().unwrap();
 
-    let lessons_change_page = unsafe { parse_page("LESSONS_CHANGES_PAGE") };
+    let lessons_change_page = unsafe { env("LESSONS_CHANGES_PAGE") };
     let http_client = HttpClient::new(lessons_change_page, "");
 
-    let document = unsafe { http_client.get_page_document(lessons_change_page).await }.unwrap();
+    let document = unsafe {
+        Str::new(
+            http_client
+                .get_page_document(lessons_change_page)
+                .await
+                .unwrap(),
+        )
+    }
+    .unwrap();
 
     let profiler = Profiler::new_heap();
     let time = Instant::now();
 
-    let parser = Parser::new(&document);
+    let parser = changes::Parser::new(&document);
     let changes = parser.changes();
     drop(profiler);
 
@@ -49,9 +60,25 @@ async fn main() {
             println!();
         }
     }
+
+    let content = unsafe {
+        http_client
+            .get_page_document("https://419.spb.ru/f/2026-deti_s_28_sent.xls")
+            .await
+    }
+    .unwrap();
+
+    let time = Instant::now();
+    let mut lessons = lessons::Parser::new();
+    unsafe { lessons.reparse(&content).unwrap() };
+    info!("{:?}", lessons.classes);
+    lessons.get_by_class("");
+    info!("Parsed lessons in {}ns", time.elapsed().as_nanos());
+    info!("{:?}", lessons.classes);
+    drop(content);
 }
 
-unsafe fn parse_page(env_name: &'static str) -> &'static str {
+unsafe fn env(env_name: &'static str) -> &'static str {
     let page = var(env_name).unwrap();
     let (ptr, len) = (page.as_ptr(), page.len());
     unsafe {

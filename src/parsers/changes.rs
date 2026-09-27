@@ -93,7 +93,7 @@ impl<'a> Parser<'a> {
 
         let mut last_row: usize = 0;
         for (i, (start, end, title)) in stops.into_iter().enumerate() {
-            changes.push(Change::new(columns, title));
+            changes.push(Change::new(title));
             self.tbody(
                 columns,
                 &mut elements,
@@ -239,15 +239,15 @@ impl<'a> Parser<'a> {
 #[derive(Debug)]
 pub struct Change<'a> {
     //pub change_data: FxHashMap<Cow<'b, str>, Vec<Cow<'c, str>>>,
-    pub column_len: usize,
+    // pub column_len: usize,
     pub change_data: Vec<Vec<Cow<'a, str>>>,
     pub title: Cow<'a, str>,
 }
 
 impl<'a> Change<'a> {
-    pub fn new(column_len: usize, title: Cow<'a, str>) -> Self {
+    pub fn new(title: Cow<'a, str>) -> Self {
         Self {
-            column_len,
+            // column_len,
             change_data: Vec::with_capacity(24),
             title,
         }

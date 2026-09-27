@@ -20,10 +20,8 @@ impl HttpClient {
     pub async unsafe fn get_page_document<'b, 'a: 'b>(
         &self,
         page: &'static str,
-    ) -> Result<Str<'b, 'a>, Error> {
-        let document_bytes = reqwest::get(page).await?.bytes().await?;
-
-        unsafe { Str::new(document_bytes) }
+    ) -> Result<Bytes, Error> {
+        Ok(reqwest::get(page).await?.bytes().await?)
     }
 }
 

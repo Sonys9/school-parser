@@ -5,4 +5,10 @@ pub enum Error {
 
     #[error("Parse error: {0}")]
     Parse(#[from] std::str::Utf8Error),
+
+    #[error("Office error: {0}")]
+    Office(#[from] office_oxide::OfficeError),
+
+    #[error("Document error: bad structure")]
+    Document,
 }
