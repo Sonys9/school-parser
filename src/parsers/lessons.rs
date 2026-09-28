@@ -1,4 +1,4 @@
-use std::{io::Cursor, mem::transmute};
+use std::{cmp::Ordering::Less, fmt::Debug, io::Cursor, mem::transmute};
 
 use office_oxide::{Document, DocumentFormat};
 use tracing::info;
@@ -15,13 +15,13 @@ const LESSONS_COUNT: usize = 10;
 const STUDY_DAYS_COUNT: usize = 6;
 
 pub struct Parser {
-    pub lessons: [[[u8; LESSONS_COUNT]; CLASSES_COUNT]; STUDY_DAYS_COUNT],
+    pub lessons: [[[Lesson; LESSONS_COUNT]; CLASSES_COUNT]; STUDY_DAYS_COUNT],
 }
 
 impl Parser {
     pub fn new() -> Self {
         Self {
-            lessons: [[[0u8; LESSONS_COUNT]; CLASSES_COUNT]; STUDY_DAYS_COUNT],
+            lessons: [[[Lesson::default(); LESSONS_COUNT]; CLASSES_COUNT]; STUDY_DAYS_COUNT],
         }
     }
 
@@ -29,9 +29,6 @@ impl Parser {
         let static_content: &'static str = unsafe { transmute(content) };
         let document =
             Document::from_reader(Cursor::new(static_content), DocumentFormat::Xlsx)?.plain_text();
-        let third_line: &'static str =
-            unsafe { transmute(document.lines().nth(2).ok_or_else(|| Error::Document)?) };
-        self.extract_classes(third_line);
         self.lessons(document);
         Ok(())
     }
@@ -40,41 +37,78 @@ impl Parser {
         for (i, line) in document.lines().skip(3).enumerate() {
             if line.starts_with("\"Шко") {
                 // \"Школьный диспетчер\"
+                info!("sum: {}", i);
                 return;
             };
-            self.row(line.split("\t"), i);
+            self.row(line.split("\t").skip(1), i);
         }
     }
 
     pub fn get_by_class(&self, class: &str) -> Option<Vec<&str>> {
-        if !self.classes.contains(&class) {
+        let Some(class_index) = CLASSES.iter().position(|&pclass| pclass == class) else {
             return None;
         };
-
+        for (i, lessons) in self.lessons.iter().enumerate() {
+            info!("=== {}th day of the week ===", i + 1);
+            for (i, lesson) in lessons[class_index].iter().enumerate() {
+                if lesson.name_id == 0 && lesson.class_id == 0 {
+                    continue;
+                };
+                info!("[{}] {}: {}", i + 1, lesson.name_id, lesson.class_id);
+            }
+        }
         None
     }
 
-    fn row<'b>(&mut self, row: impl Iterator<Item = &'b str>, index: usize) {
-        let day_index = index / LESSONS_COUNT + 1;
-        if index % (LESSONS_COUNT + 1) == 0 {
+    fn row<'b, I>(&mut self, mut row: I, index: usize)
+    where
+        I: Iterator<Item = &'b str> + Debug,
+    {
+        let day_index = index / (LESSONS_COUNT + 1);
+        let offset = index % (LESSONS_COUNT + 1);
+        if offset == 0 {
             return;
         };
-        for block in row {}
-    }
-
-    fn extract_classes(&mut self, line: &'a str) {
+        let mut class_number = 0;
         let mut i = 0;
-        for data in line.split("\t") {
-            if data == "№" || data.is_empty() {
-                continue;
-            };
-            self.classes[i] = data;
+        while class_number < CLASSES_COUNT {
+            let Some(lesson_name) = row.next().map(|name| name.trim()) else { return };
+            let Some(lesson_class) = row.next().map(|name| name.trim()) else { return };
             i += 1;
-            if i == CLASSES_COUNT {
-                return;
+            class_number += 1;
+            print!("{:?} {:?} ", lesson_name, lesson_class);
+            if !(lesson_name.is_empty() && lesson_class.is_empty()) {
+                if class_number == 12 {
+                    info!(
+                        "\nsetting on {} {} {} {:?} {} {:?} {}\n",
+                        day_index,
+                        class_number,
+                        offset - 1,
+                        lesson_name,
+                        lesson_name.is_empty(),
+                        lesson_class,
+                        lesson_class.is_empty()
+                    );
+                };
+                self.lessons[day_index][class_number - 1][offset - 1] = Lesson {
+                    name_id: 1,
+                    class_id: 1,
+                };
             };
+            if i == 6 {
+                for _ in 0..2 {
+                    row.next();
+                }
+                i = 0;
+            }
         }
     }
+}
+
+#[derive(Default, Copy, Clone, Debug)]
+pub struct Lesson {
+    pub name_id: u8,
+    pub class_id: u8,
 }
 
 #[cfg(test)]
@@ -86,17 +120,9 @@ mod tests {
         let content = include_bytes!("../../mock_file.xls");
         let mut lessons = Parser::new();
         unsafe { lessons.reparse(content).unwrap() };
-        lessons.get_by_class("5а");
+        let lessons = lessons.get_by_class("5а").unwrap();
 
-        println!("Classes: {:?}", lessons.classes);
-        assert_eq!(
-            lessons
-                .classes
-                .iter()
-                .filter(|class| !class.is_empty())
-                .collect::<Vec<&&str>>()
-                .len(),
-            CLASSES_COUNT
-        )
+        println!("lessons: {:?}", lessons);
+        assert_eq!(lessons.len(), 999);
     }
 }

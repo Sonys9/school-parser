@@ -71,10 +71,8 @@ async fn main() {
     let time = Instant::now();
     let mut lessons = lessons::Parser::new();
     unsafe { lessons.reparse(&content).unwrap() };
-    info!("{:?}", lessons.classes);
-    lessons.get_by_class("");
+    lessons.get_by_class("8а");
     info!("Parsed lessons in {}ns", time.elapsed().as_nanos());
-    info!("{:?}", lessons.classes);
     drop(content);
 }
 
