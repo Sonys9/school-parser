@@ -1,16 +1,13 @@
 use std::{
-    env::var,
-    mem::{forget, transmute},
-    slice::from_raw_parts,
+    env::var, mem::{forget, transmute}, slice::from_raw_parts, time::Duration,
 };
 
 use dhat::{Alloc, Profiler};
-use tokio::time::Instant;
+use tokio::time::{Instant, sleep};
 use tracing::info;
 
 use crate::{
-    http::{HttpClient, Str},
-    parsers::{changes, lessons},
+    http::{HttpClient, Str}, parsers::{changes, lessons::{self, Lesson}, table::{self, ARRAY_LEN}},
 };
 
 mod errors;
@@ -68,12 +65,30 @@ async fn main() {
     }
     .unwrap();
 
+    info!("content len: {}", content.len());
     let time = Instant::now();
     let mut lessons = lessons::Parser::new();
     unsafe { lessons.reparse(&content).unwrap() };
-    lessons.get_by_class("8а");
-    info!("Parsed lessons in {}ns", time.elapsed().as_nanos());
     drop(content);
+    lessons.get_by_class("11а");
+    info!("Parsed lessons in {}ns", time.elapsed().as_nanos());
+    info!("Lessons len: {} bytes", lessons.lessons.iter().flatten().flatten().count() * std::mem::size_of::<Lesson>());
+
+    let table_ = table::table().lock();
+    info!("Table len: {}/{} bytes ({}%)", table_.len, ARRAY_LEN, table_.len as f32 / ARRAY_LEN as f32 * 100.);
+    let mut slice = &table_.data[..table_.len];
+    let mut count: u8 = 0;
+    loop {
+        let _ = table::read_u8(&mut slice);
+        let len = table::read_u8(&mut slice);
+        let (_, rslice) = slice.split_at(len as usize);
+        slice = rslice;
+        count += 1;
+        if slice.is_empty() {
+            break;
+        };
+    };
+    info!("Table elements count: {}/256 ({}%)", count, count as f32 / 256. * 100.);
 }
 
 unsafe fn env(env_name: &'static str) -> &'static str {

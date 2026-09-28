@@ -3,7 +3,7 @@ use std::{cmp::Ordering::Less, fmt::Debug, io::Cursor, mem::transmute};
 use office_oxide::{Document, DocumentFormat};
 use tracing::info;
 
-use crate::errors::Error;
+use crate::{errors::Error, parsers::table};
 
 const CLASSES_COUNT: usize = 38;
 const CLASSES: [&'static str; CLASSES_COUNT] = [
@@ -29,6 +29,7 @@ impl Parser {
         let static_content: &'static str = unsafe { transmute(content) };
         let document =
             Document::from_reader(Cursor::new(static_content), DocumentFormat::Xlsx)?.plain_text();
+        info!("content parsed len: {}", document.len());
         self.lessons(document);
         Ok(())
     }
@@ -54,7 +55,7 @@ impl Parser {
                 if lesson.name_id == 0 && lesson.class_id == 0 {
                     continue;
                 };
-                info!("[{}] {}: {}", i + 1, lesson.name_id, lesson.class_id);
+                info!("[{}] {}: {}", i + 1, table::name(lesson.name_id).unwrap(), table::name(lesson.class_id).unwrap());
             }
         }
         None
@@ -76,23 +77,10 @@ impl Parser {
             let Some(lesson_class) = row.next().map(|name| name.trim()) else { return };
             i += 1;
             class_number += 1;
-            print!("{:?} {:?} ", lesson_name, lesson_class);
             if !(lesson_name.is_empty() && lesson_class.is_empty()) {
-                if class_number == 12 {
-                    info!(
-                        "\nsetting on {} {} {} {:?} {} {:?} {}\n",
-                        day_index,
-                        class_number,
-                        offset - 1,
-                        lesson_name,
-                        lesson_name.is_empty(),
-                        lesson_class,
-                        lesson_class.is_empty()
-                    );
-                };
                 self.lessons[day_index][class_number - 1][offset - 1] = Lesson {
-                    name_id: 1,
-                    class_id: 1,
+                    name_id: table::id(lesson_name),
+                    class_id: table::id(lesson_class),
                 };
             };
             if i == 6 {
