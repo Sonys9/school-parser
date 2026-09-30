@@ -1,6 +1,6 @@
-use std::{mem::forget, ops::Deref, slice::from_raw_parts};
+use core::{net::{Ipv4Addr, SocketAddrV4}, time::Duration};
 
-use bytes::Bytes;
+use rustix::{fd::OwnedFd, io::{read, write}, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::{Timeout, set_socket_timeout}}};
 
 use crate::errors::Error;
 
@@ -17,50 +17,63 @@ impl HttpClient {
         }
     }
 
-    pub async unsafe fn get_page_document<'b, 'a: 'b>(
-        &self,
-        page: &'static str,
-    ) -> Result<Bytes, Error> {
-        Ok(reqwest::get(page).await?.bytes().await?)
+    pub fn get(path: &str, target: &str, timeout: u64) -> Result<Request, Error> {
+        let fd = socket(AddressFamily::INET, SocketType::STREAM, Some(TCP))?;
+        set_socket_timeout(&fd, Timeout::Send, Some(Duration::from_millis(timeout)))?;
+        set_socket_timeout(&fd, Timeout::Recv, Some(Duration::from_millis(timeout)))?;
+        let server_ip = Ipv4Addr::new(127, 0, 0, 1);
+        let server_addr = SocketAddrV4::new(server_ip, 4190);
+        connect(&fd, &server_addr)?;
+        write(&fd, b"GET ")?;
+        write(&fd, path.as_bytes())?;
+        write(&fd, b" HTTP/1.1\r\nHost: localhost:4190\r\nx-target: ")?;
+        write(&fd, target.as_bytes())?;
+        write(&fd, b"\r\n\r\n")?;
+        Ok(Request { fd, is_readed: false })
     }
 }
 
-#[derive(Debug)]
-pub struct Str<'b, 'a: 'b> {
-    slice: &'a [u8],
-    str: &'b str,
-    ptr: *mut u8,
+pub struct Request {
+    pub fd: OwnedFd,
+    is_readed: bool
 }
 
-impl<'b, 'a: 'b> Str<'a, 'b> {
-    pub unsafe fn new(bytes: Bytes) -> Result<Self, Error> {
-        let (ptr, len) = (bytes.as_ptr(), bytes.len());
-        forget(bytes);
-
-        unsafe {
-            let slice = from_raw_parts(ptr, len);
-            let str = str::from_utf8(slice)?;
-            Ok(Self {
-                slice,
-                str,
-                ptr: ptr as *mut u8,
-            })
-        }
+impl Request {
+    pub fn plain_text(&mut self, buf: &mut [u8], start_at: Option<&[u8]>, stop_at: Option<&[u8]>) -> Result<usize, Error> {
+        self.is_readed = true;
+        let mut len = 0;
+        let mut started = start_at.is_none();
+        loop {
+            let readed = read(&self.fd, &mut buf[len..]).map_err(|_| Error::Response("Timeout"))?;
+            if readed == 0 {
+                break;
+            };
+            if let Some(start_at) = start_at {
+                if let Some(index) = try_find(&buf, len, readed, start_at) && !started {
+                    buf.copy_within(index..readed, 0);
+                    len += readed - index;
+                    started = true;
+                    continue;
+                };
+            };
+            if !started {
+                continue;
+            };
+            if let Some(stop_at) = stop_at {
+                if let Some(index) = try_find(&buf, len, readed, stop_at) {
+                    len = index;
+                    break;
+                };
+            };
+            len += readed;
+            if len >= 4 && &buf[buf.len() - 4..] == b"\r\n\r\n" {
+                break;
+            };
+        };
+        Ok(len)
     }
 }
 
-impl<'b, 'a: 'b> Deref for Str<'a, 'b> {
-    type Target = &'b str;
-
-    fn deref(&self) -> &Self::Target {
-        &self.str
-    }
-}
-
-impl<'b, 'a> Drop for Str<'a, 'b> {
-    fn drop(&mut self) {
-        let len = self.slice.len();
-        let vec = unsafe { Vec::from_raw_parts(self.ptr, len, len) };
-        drop(vec);
-    }
+fn try_find(buf: &[u8], len: usize, readed: usize, query: &[u8]) -> Option<usize> {
+    buf[..len + readed].windows(query.len()).position(|win| win == query)
 }

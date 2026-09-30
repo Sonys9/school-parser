@@ -33,3 +33,28 @@ pub unsafe extern "C" fn bcmp(first: *const c_void, second: *const c_void, len: 
     };
     0
 }
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn memmove(dst: *mut c_void, src: *const c_void, len: usize) -> *mut c_void {
+    let dst_mut = dst as *mut u8;
+    let src = src as *mut u8;
+    let dst = dst as *mut c_void;
+
+    if dst_mut == src || len == 0 {
+        return dst;
+    };
+
+    if dst_mut > src && dst_mut < unsafe {src.add(len) } {
+        let mut i = len;
+        while i > 0 {
+            i -= 1;
+            unsafe { *dst_mut.add(i) = *src.add(i) };
+        };
+        return dst;
+    };
+
+    for i in 0..len {
+        unsafe { *dst_mut.add(i) = *src.add(i) };
+    };
+    dst
+}
