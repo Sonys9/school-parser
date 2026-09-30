@@ -1,6 +1,6 @@
 use core::{net::{Ipv4Addr, SocketAddrV4}, time::Duration};
 
-use rustix::{fd::OwnedFd, io::{read, write}, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::{Timeout, set_socket_timeout}}};
+use rustix::{fd::OwnedFd, io::{IoSlice, read, write, writev}, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::{Timeout, set_socket_timeout}}};
 
 use crate::errors::Error;
 
@@ -24,11 +24,14 @@ impl HttpClient {
         let server_ip = Ipv4Addr::new(127, 0, 0, 1);
         let server_addr = SocketAddrV4::new(server_ip, 4190);
         connect(&fd, &server_addr)?;
-        write(&fd, b"GET ")?;
-        write(&fd, path.as_bytes())?;
-        write(&fd, b" HTTP/1.1\r\nHost: localhost:4190\r\nx-target: ")?;
-        write(&fd, target.as_bytes())?;
-        write(&fd, b"\r\n\r\n")?;
+        let buffers = [
+            IoSlice::new(b"GET "),
+            IoSlice::new(path.as_bytes()),
+            IoSlice::new(b" HTTP/1.1\r\nHost: localhost:4190\r\nx-target: "),
+            IoSlice::new(target.as_bytes()),
+            IoSlice::new(b"\r\n\r\n"),  
+        ];
+        writev(&fd, &buffers)?;
         Ok(Request { fd, is_readed: false })
     }
 }
