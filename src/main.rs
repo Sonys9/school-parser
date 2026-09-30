@@ -1,101 +1,28 @@
-use std::{
-    env::var, mem::{forget, transmute}, slice::from_raw_parts, time::Duration,
-};
+#![no_std]
+#![no_main]
+#![feature(macro_metavar_expr)]
 
-use dhat::{Alloc, Profiler};
-use tokio::time::{Instant, sleep};
-use tracing::info;
+use core::net::{Ipv4Addr, SocketAddrV4};
 
-use crate::{
-    http::{HttpClient, Str}, parsers::{changes, lessons::{self, Lesson}, table::{self, ARRAY_LEN}},
-};
+use rustix::{io::{read, write}, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket}};
 
-mod errors;
-mod http;
-mod parsers;
+use crate::syscalls::{exit, terminal, timestamp};
 
-#[global_allocator]
-static ALLOC: Alloc = Alloc;
+#[macro_use]
+mod log;
+mod syscalls;
+mod panic;
+mod essentials;
 
-#[tokio::main]
-async fn main() {
-    tracing_subscriber::fmt::init();
-    dotenvy::dotenv().unwrap();
-
-    let lessons_change_page = unsafe { env("LESSONS_CHANGES_PAGE") };
-    let http_client = HttpClient::new(lessons_change_page, "");
-
-    let document = unsafe {
-        Str::new(
-            http_client
-                .get_page_document(lessons_change_page)
-                .await
-                .unwrap(),
-        )
-    }
-    .unwrap();
-
-    let profiler = Profiler::new_heap();
-    let time = Instant::now();
-
-    let parser = changes::Parser::new(&document);
-    let changes = parser.changes();
-    drop(profiler);
-
-    info!(
-        "Parsed changes: {:?} in {}ns",
-        changes,
-        time.elapsed().as_nanos()
-    );
-
-    for change in changes {
-        println!("{}", change.title);
-        for row in change.change_data {
-            for block in row {
-                print!("{}\t", block);
-            }
-            println!();
-        }
-    }
-
-    let content = unsafe {
-        http_client
-            .get_page_document("https://419.spb.ru/f/2026-deti_s_28_sent.xls")
-            .await
-    }
-    .unwrap();
-
-    info!("content len: {}", content.len());
-    let time = Instant::now();
-    let mut lessons = lessons::Parser::new();
-    unsafe { lessons.reparse(&content).unwrap() };
-    drop(content);
-    lessons.get_by_class("11а");
-    info!("Parsed lessons in {}ns", time.elapsed().as_nanos());
-    info!("Lessons len: {} bytes", lessons.lessons.iter().flatten().flatten().count() * std::mem::size_of::<Lesson>());
-
-    let table_ = table::table().lock();
-    info!("Table len: {}/{} bytes ({}%)", table_.len, ARRAY_LEN, table_.len as f32 / ARRAY_LEN as f32 * 100.);
-    let mut slice = &table_.data[..table_.len];
-    let mut count: u8 = 0;
-    loop {
-        let _ = table::read_u8(&mut slice);
-        let len = table::read_u8(&mut slice);
-        let (_, rslice) = slice.split_at(len as usize);
-        slice = rslice;
-        count += 1;
-        if slice.is_empty() {
-            break;
-        };
-    };
-    info!("Table elements count: {}/256 ({}%)", count, count as f32 / 256. * 100.);
-}
-
-unsafe fn env(env_name: &'static str) -> &'static str {
-    let page = var(env_name).unwrap();
-    let (ptr, len) = (page.as_ptr(), page.len());
-    unsafe {
-        forget(page);
-        transmute(from_raw_parts(ptr, len))
-    }
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn _start() -> ! {
+    let fd = socket(AddressFamily::INET, SocketType::STREAM, Some(TCP)).expect("Failed to connect to the socket");
+    let server_ip = Ipv4Addr::new(185, 32, 58, 252);
+    let server_addr = SocketAddrV4::new(server_ip, 80);
+    connect(&fd, &server_addr).expect("Failed to connect to the server");
+    write(&fd, b"GET / HTTP/1.1\r\nHost: 419.spb.ru\r\n\r\n").expect("Failed to send the request");
+    let mut buf = [0u8; 1024];
+    let len = read(&fd, &mut buf).expect("Failed to read the response");
+    info!("Response: {:?}", str::from_utf8(&buf[..len]));
+    exit(0);
 }
