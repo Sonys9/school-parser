@@ -1,101 +1,47 @@
-use std::{
-    env::var, mem::{forget, transmute}, slice::from_raw_parts, time::Duration,
-};
+#![no_std]
+#![no_main]
+#![feature(macro_metavar_expr)]
 
-use dhat::{Alloc, Profiler};
-use tokio::time::{Instant, sleep};
-use tracing::info;
+use core::net::{Ipv4Addr, SocketAddrV4};
 
-use crate::{
-    http::{HttpClient, Str}, parsers::{changes, lessons::{self, Lesson}, table::{self, ARRAY_LEN}},
-};
+use rustix::{io::{read, write}, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::Timeout}};
 
-mod errors;
+use crate::{http::HttpClient, str::utf8_lossy, syscalls::exit};
+
+#[macro_use]
+mod log;
+mod syscalls;
+mod panic;
+mod essentials;
 mod http;
-mod parsers;
+mod errors;
+mod str;
 
-#[global_allocator]
-static ALLOC: Alloc = Alloc;
+const START_CHANGES_MARKER: &[u8] = "<h1>Изменения расписания</h1>".as_bytes();
+const STOP_CHANGES_MARKER: &[u8] = "<br clear=\"all\"/>".as_bytes();
 
-#[tokio::main]
-async fn main() {
-    tracing_subscriber::fmt::init();
-    dotenvy::dotenv().unwrap();
-
-    let lessons_change_page = unsafe { env("LESSONS_CHANGES_PAGE") };
-    let http_client = HttpClient::new(lessons_change_page, "");
-
-    let document = unsafe {
-        Str::new(
-            http_client
-                .get_page_document(lessons_change_page)
-                .await
-                .unwrap(),
-        )
-    }
-    .unwrap();
-
-    let profiler = Profiler::new_heap();
-    let time = Instant::now();
-
-    let parser = changes::Parser::new(&document);
-    let changes = parser.changes();
-    drop(profiler);
-
-    info!(
-        "Parsed changes: {:?} in {}ns",
-        changes,
-        time.elapsed().as_nanos()
-    );
-
-    for change in changes {
-        println!("{}", change.title);
-        for row in change.change_data {
-            for block in row {
-                print!("{}\t", block);
-            }
-            println!();
-        }
-    }
-
-    let content = unsafe {
-        http_client
-            .get_page_document("https://419.spb.ru/f/2026-deti_s_28_sent.xls")
-            .await
-    }
-    .unwrap();
-
-    info!("content len: {}", content.len());
-    let time = Instant::now();
-    let mut lessons = lessons::Parser::new();
-    unsafe { lessons.reparse(&content).unwrap() };
-    drop(content);
-    lessons.get_by_class("11а");
-    info!("Parsed lessons in {}ns", time.elapsed().as_nanos());
-    info!("Lessons len: {} bytes", lessons.lessons.iter().flatten().flatten().count() * std::mem::size_of::<Lesson>());
-
-    let table_ = table::table().lock();
-    info!("Table len: {}/{} bytes ({}%)", table_.len, ARRAY_LEN, table_.len as f32 / ARRAY_LEN as f32 * 100.);
-    let mut slice = &table_.data[..table_.len];
-    let mut count: u8 = 0;
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn _start() -> ! {
+    let mut count = 0;
     loop {
-        let _ = table::read_u8(&mut slice);
-        let len = table::read_u8(&mut slice);
-        let (_, rslice) = slice.split_at(len as usize);
-        slice = rslice;
-        count += 1;
-        if slice.is_empty() {
-            break;
+        let Ok(mut request) = HttpClient::get("/novosti/news_post/izmeneniya-raspisaniya", "419.spb.ru", 1000).inspect_err(|e| {
+            error!("Error: {}", e);
+        }) else {
+            continue;
         };
+        let mut buf = [0u8; 1024 * 512];
+        let Ok(len) = request.plain_text(&mut buf, Some(START_CHANGES_MARKER), Some(STOP_CHANGES_MARKER)).inspect_err(|e| {
+            error!("Error: {}", e);
+        }) else {
+            continue;
+        };
+        match utf8_lossy(&mut buf[..len]) {
+            Ok(_) => {
+                count += 1;
+                info!("Successfuly parsed {}th page", count);
+            },
+            Err(e) => info!("Parsing error: {}", e)
+        }
     };
-    info!("Table elements count: {}/256 ({}%)", count, count as f32 / 256. * 100.);
-}
-
-unsafe fn env(env_name: &'static str) -> &'static str {
-    let page = var(env_name).unwrap();
-    let (ptr, len) = (page.as_ptr(), page.len());
-    unsafe {
-        forget(page);
-        transmute(from_raw_parts(ptr, len))
-    }
+    exit(0);
 }
