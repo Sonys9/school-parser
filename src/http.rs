@@ -46,6 +46,9 @@ impl Request {
         loop {
             let readed = read(&self.fd, &mut buf[len..]).map_err(|_| Error::Response("Timeout"))?;
             if readed == 0 {
+                if len >= 4 && &buf[len - 4..] == b"\r\n\r\n" {
+                    len -= 4;
+                };
                 break;
             };
             if let Some(start_at) = start_at {
@@ -66,9 +69,6 @@ impl Request {
                 };
             };
             len += readed;
-            if len >= 4 && &buf[buf.len() - 4..] == b"\r\n\r\n" {
-                break;
-            };
         };
         Ok(len)
     }
