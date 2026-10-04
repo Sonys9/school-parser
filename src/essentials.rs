@@ -58,3 +58,15 @@ pub unsafe extern "C" fn memmove(dst: *mut c_void, src: *const c_void, len: usiz
     };
     dst
 }
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn memcpy(dst: *mut c_void, src: *const c_void, len: usize) -> *mut c_void {
+    let src = src as *mut u8;
+    let dst = dst as *mut u8;
+    
+    for i in 0..len {
+        unsafe { *dst.add(i) = *src.add(i) };
+    };
+
+    dst as *mut c_void
+}

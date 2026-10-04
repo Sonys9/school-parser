@@ -1,23 +1,27 @@
-use core::{net::{Ipv4Addr, SocketAddrV4}, time::Duration};
+use core::{ffi::c_void, net::{Ipv4Addr, SocketAddrV4}, time::Duration};
 
-use rustix::{fd::OwnedFd, io::{IoSlice, read, write, writev}, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::{Timeout, set_socket_timeout}}};
+use rustix::{fd::{AsRawFd, OwnedFd}, io::{IoSlice, read, write, writev}, io_uring::iovec, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::{Timeout, set_socket_timeout}}};
+use rustix_uring::{IoUring, opcode, types};
 
 use crate::errors::Error;
 
 pub struct HttpClient {
     lessons_change_page: &'static str,
     lessons_page: &'static str,
+    pub ring: IoUring
 }
 
 impl HttpClient {
     pub fn new(lessons_change_page: &'static str, lessons_page: &'static str) -> Self {
+        let ring = IoUring::new(128).expect("Failed to get the ring");
         Self {
             lessons_change_page,
             lessons_page,
+            ring
         }
     }
 
-    pub fn get(path: &str, target: &str, timeout: u64) -> Result<Request, Error> {
+    pub fn get(&mut self, path: &str, target: &str, timeout: u64) -> Result<Request, Error> {
         let fd = socket(AddressFamily::INET, SocketType::STREAM, Some(TCP))?;
         set_socket_timeout(&fd, Timeout::Send, Some(Duration::from_millis(timeout)))?;
         set_socket_timeout(&fd, Timeout::Recv, Some(Duration::from_millis(timeout)))?;
@@ -25,14 +29,21 @@ impl HttpClient {
         let server_addr = SocketAddrV4::new(server_ip, 4190);
         connect(&fd, &server_addr)?;
         let buffers = [
-            IoSlice::new(b"GET "),
-            IoSlice::new(path.as_bytes()),
-            IoSlice::new(b" HTTP/1.1\r\nHost: localhost:4190\r\nx-target: "),
-            IoSlice::new(target.as_bytes()),
-            IoSlice::new(b"\r\n\r\n"),  
+            iovec::new(b"GET "),
+            iovec::new(path.as_bytes()),
+            iovec::new(b" HTTP/1.1\r\nHost: localhost:4190\r\nx-target: "),
+            iovec::new(target.as_bytes()),
+            iovec::new(b"\r\n\r\n"),
         ];
-        writev(&fd, &buffers)?;
+        let write_e = opcode::Writev::new(types::Fd(fd.as_raw_fd()), buffers.as_ptr(), buffers.len() as u32).build();
+        unsafe { 
+            self.ring.submission().push(&write_e)?;
+        };
         Ok(Request { fd, is_readed: false })
+    }
+
+    pub fn wait(&self) -> Result<usize, Error> {
+        Ok(self.ring.submit_and_wait(1)?)
     }
 }
 
@@ -42,7 +53,15 @@ pub struct Request {
 }
 
 impl Request {
-    pub fn plain_text(&mut self, buf: &mut [u8], start_at: Option<&[u8]>, stop_at: Option<&[u8]>) -> Result<usize, Error> {
+    pub fn next(&mut self, buffer: &mut [u8], ring: &mut IoUring) -> Result<(), Error> {
+        let read_e = opcode::Read::new(types::Fd(self.fd.as_raw_fd()), buffer.as_mut_ptr(), buffer.len() as u32).build();
+        unsafe {
+            ring.submission().push(&read_e)?;
+        };
+        Ok(())
+    }
+
+    pub fn blocking_plain_text(&mut self, buf: &mut [u8], start_at: Option<&[u8]>, stop_at: Option<&[u8]>) -> Result<usize, Error> {
         self.is_readed = true;
         let mut len = 0;
         let mut started = start_at.is_none();
@@ -79,4 +98,14 @@ impl Request {
 
 fn try_find(buf: &[u8], len: usize, readed: usize, query: &[u8]) -> Option<usize> {
     buf[..len + readed].windows(query.len()).position(|win| win == query)
+}
+
+trait New {
+    fn new(data: &[u8]) -> Self;
+}
+
+impl New for iovec {
+    fn new(data: &[u8]) -> Self {
+        Self { iov_base: data.as_ptr() as *mut c_void, iov_len: data.len() }
+    }
 }
