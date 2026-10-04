@@ -4,7 +4,7 @@ static LEN: usize = 16;
 static mut STACK: [u8; 1024 * LEN] = [0u8; 1024 * LEN];
 
 #[allow(static_mut_refs)]
-pub fn align(func: unsafe extern "C" fn()) {
+pub fn align(func: unsafe extern "C" fn() -> !) {
     unsafe { 
         asm!(
             "mov rdi, rsp",

@@ -1,6 +1,6 @@
 use core::{ffi::c_void, net::{Ipv4Addr, SocketAddrV4}, time::Duration};
 
-use rustix::{fd::{AsRawFd, OwnedFd}, io::{IoSlice, read, write, writev}, io_uring::iovec, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::{Timeout, set_socket_timeout}}};
+use rustix::{fd::{AsRawFd, OwnedFd}, io::{IoSlice, close, read, write, writev}, io_uring::iovec, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::{Timeout, set_socket_timeout}}};
 use rustix_uring::{IoUring, opcode, types};
 
 use crate::errors::Error;
@@ -61,7 +61,7 @@ impl Request {
         Ok(())
     }
 
-    pub fn blocking_plain_text(&mut self, buf: &mut [u8], start_at: Option<&[u8]>, stop_at: Option<&[u8]>) -> Result<usize, Error> {
+    /* pub fn blocking_plain_text(&mut self, buf: &mut [u8], start_at: Option<&[u8]>, stop_at: Option<&[u8]>) -> Result<usize, Error> {
         self.is_readed = true;
         let mut len = 0;
         let mut started = start_at.is_none();
@@ -93,7 +93,7 @@ impl Request {
             len += readed;
         };
         Ok(len)
-    }
+    } */
 }
 
 fn try_find(buf: &[u8], len: usize, readed: usize, query: &[u8]) -> Option<usize> {
