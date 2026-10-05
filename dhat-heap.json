@@ -8,10 +8,117 @@
 "Mtu": "s",
 "tuth": 10,
 "cmd": "target/release/schoolbot",
-"pid": 20698,
-"tg": 2125,
-"te": 2138,
+"pid": 20060,
+"tg": 2239,
+"te": 2251,
 "pps": [
+{
+"tb": 36,
+"tbk": 2,
+"tl": 2020,
+"mb": 24,
+"mbk": 1,
+"gb": 24,
+"gbk": 1,
+"eb": 24,
+"ebk": 1,
+"fs": [
+1,
+2,
+3,
+4,
+5
+]
+},
+{
+"tb": 560,
+"tbk": 2,
+"tl": 4199,
+"mb": 560,
+"mbk": 2,
+"gb": 560,
+"gbk": 2,
+"eb": 560,
+"ebk": 2,
+"fs": [
+1,
+6,
+7,
+8,
+9,
+4,
+5
+]
+},
+{
+"tb": 432,
+"tbk": 3,
+"tl": 322,
+"mb": 144,
+"mbk": 1,
+"gb": 144,
+"gbk": 1,
+"eb": 0,
+"ebk": 0,
+"fs": [
+1,
+10,
+11
+]
+},
+{
+"tb": 1184,
+"tbk": 8,
+"tl": 11264,
+"mb": 888,
+"mbk": 6,
+"gb": 888,
+"gbk": 6,
+"eb": 888,
+"ebk": 6,
+"fs": [
+1,
+6,
+12,
+4,
+5
+]
+},
+{
+"tb": 48,
+"tbk": 2,
+"tl": 2220,
+"mb": 32,
+"mbk": 1,
+"gb": 32,
+"gbk": 1,
+"eb": 32,
+"ebk": 1,
+"fs": [
+1,
+13,
+14,
+15,
+4,
+5
+]
+},
+{
+"tb": 5184,
+"tbk": 9,
+"tl": 1873,
+"mb": 5184,
+"mbk": 9,
+"gb": 5184,
+"gbk": 9,
+"eb": 5184,
+"ebk": 9,
+"fs": [
+1,
+16,
+11
+]
+},
 {
 "tb": 1344,
 "tbk": 3,
@@ -24,188 +131,33 @@
 "ebk": 1,
 "fs": [
 1,
-2,
-3,
-4,
-5,
-6
-]
-},
-{
-"tb": 2477,
-"tbk": 34,
-"tl": 27,
-"mb": 234,
-"mbk": 1,
-"gb": 0,
-"gbk": 0,
-"eb": 0,
-"ebk": 0,
-"fs": [
-1,
-7,
-8,
-9,
-6
-]
-},
-{
-"tb": 15552,
-"tbk": 377,
-"tl": 145665,
-"mb": 8472,
-"mbk": 116,
-"gb": 8472,
-"gbk": 116,
-"eb": 8472,
-"ebk": 116,
-"fs": [
-1,
-10,
-11,
-12,
-13
-]
-},
-{
-"tb": 560,
-"tbk": 2,
-"tl": 3978,
-"mb": 560,
-"mbk": 2,
-"gb": 560,
-"gbk": 2,
-"eb": 560,
-"ebk": 2,
-"fs": [
-1,
-14,
-15,
-16,
 17,
-12,
-13
-]
-},
-{
-"tb": 36,
-"tbk": 2,
-"tl": 1904,
-"mb": 24,
-"mbk": 1,
-"gb": 24,
-"gbk": 1,
-"eb": 24,
-"ebk": 1,
-"fs": [
-1,
-10,
 18,
-12,
-13
-]
-},
-{
-"tb": 1920,
-"tbk": 3,
-"tl": 448,
-"mb": 640,
-"mbk": 1,
-"gb": 640,
-"gbk": 1,
-"eb": 0,
-"ebk": 0,
-"fs": [
-1,
 19,
-6
-]
-},
-{
-"tb": 882,
-"tbk": 9,
-"tl": 2696,
-"mb": 882,
-"mbk": 9,
-"gb": 882,
-"gbk": 9,
-"eb": 882,
-"ebk": 9,
-"fs": [
-1,
 20,
-6
+11
 ]
 },
 {
-"tb": 9216,
-"tbk": 64,
-"tl": 12456,
-"mb": 8208,
-"mbk": 57,
-"gb": 8208,
-"gbk": 57,
-"eb": 8208,
-"ebk": 57,
+"tb": 9360,
+"tbk": 65,
+"tl": 14443,
+"mb": 8928,
+"mbk": 62,
+"gb": 8928,
+"gbk": 62,
+"eb": 8928,
+"ebk": 62,
 "fs": [
 1,
 21,
-6
-]
-},
-{
-"tb": 432,
-"tbk": 3,
-"tl": 314,
-"mb": 144,
-"mbk": 1,
-"gb": 144,
-"gbk": 1,
-"eb": 0,
-"ebk": 0,
-"fs": [
-1,
-22,
-6
-]
-},
-{
-"tb": 5184,
-"tbk": 9,
-"tl": 2092,
-"mb": 5184,
-"mbk": 9,
-"gb": 5184,
-"gbk": 9,
-"eb": 5184,
-"ebk": 9,
-"fs": [
-1,
-23,
-6
-]
-},
-{
-"tb": 240,
-"tbk": 4,
-"tl": 1871,
-"mb": 128,
-"mbk": 1,
-"gb": 128,
-"gbk": 1,
-"eb": 128,
-"ebk": 1,
-"fs": [
-1,
-24,
-25,
-13
+11
 ]
 },
 {
 "tb": 684,
 "tbk": 21,
-"tl": 12479,
+"tl": 13061,
 "mb": 396,
 "mbk": 9,
 "gb": 396,
@@ -214,102 +166,150 @@
 "ebk": 9,
 "fs": [
 1,
-10,
+2,
+22,
+4,
+5
+]
+},
+{
+"tb": 1920,
+"tbk": 3,
+"tl": 460,
+"mb": 640,
+"mbk": 1,
+"gb": 640,
+"gbk": 1,
+"eb": 0,
+"ebk": 0,
+"fs": [
+1,
+23,
+11
+]
+},
+{
+"tb": 900,
+"tbk": 9,
+"tl": 2772,
+"mb": 900,
+"mbk": 9,
+"gb": 900,
+"gbk": 9,
+"eb": 900,
+"ebk": 9,
+"fs": [
+1,
+24,
+11
+]
+},
+{
+"tb": 2808,
+"tbk": 36,
+"tl": 26,
+"mb": 176,
+"mbk": 1,
+"gb": 0,
+"gbk": 0,
+"eb": 0,
+"ebk": 0,
+"fs": [
+1,
+25,
 26,
-12,
-13
+27,
+11
 ]
 },
 {
-"tb": 1375584,
-"tbk": 11,
-"tl": 1223,
-"mb": 688128,
-"mbk": 1,
-"gb": 688128,
-"gbk": 1,
-"eb": 688128,
-"ebk": 1,
+"tb": 18180,
+"tbk": 399,
+"tl": 153512,
+"mb": 9792,
+"mbk": 117,
+"gb": 9792,
+"gbk": 117,
+"eb": 9792,
+"ebk": 117,
 "fs": [
 1,
-27,
+2,
 28,
-29,
-12,
-13
+4,
+5
 ]
 },
 {
-"tb": 48,
-"tbk": 2,
-"tl": 2099,
-"mb": 32,
+"tb": 240,
+"tbk": 4,
+"tl": 1994,
+"mb": 128,
 "mbk": 1,
-"gb": 32,
+"gb": 128,
 "gbk": 1,
-"eb": 32,
+"eb": 128,
 "ebk": 1,
 "fs": [
 1,
-27,
+29,
 30,
-31,
-12,
-13
+5
 ]
 },
 {
-"tb": 1184,
-"tbk": 8,
-"tl": 10669,
-"mb": 888,
-"mbk": 6,
-"gb": 888,
-"gbk": 6,
-"eb": 888,
-"ebk": 6,
+"tb": 2751840,
+"tbk": 12,
+"tl": 689,
+"mb": 1376256,
+"mbk": 1,
+"gb": 1376256,
+"gbk": 1,
+"eb": 1376256,
+"ebk": 1,
 "fs": [
 1,
-14,
+13,
+31,
 32,
-12,
-13
+4,
+5
 ]
 }
 ],
 "ftbl": [
 "[root]",
-"0x55c587f50c9c: <dhat::Alloc as core::alloc::global::GlobalAlloc>::alloc (???:0:0)",
-"0x55c58799b19b: <alloc::raw_vec::RawVecInner>::finish_grow (???:0:0)",
-"0x55c58799a3e4: <alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global> (???:0:0)",
-"0x55c5879889bb: <alloc::vec::Vec<schoolbot::parsers::changes::Change>>::extend_trusted::<alloc::vec::drain::Drain<schoolbot::parsers::changes::Change>> (???:0:0)",
-"0x55c587994959: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
-"0x55c5879b46d8: <tokio::runtime::park::CachedParkThread>::block_on::<schoolbot::main::{closure#0}> (???:0:0)",
-"0x55c587fd4175: <alloc::string::String as core::convert::From<alloc::borrow::Cow<str>>>::from (???:0:0)",
-"0x55c587f1ff24: <tl::parser::tag::HTMLTag>::inner_text (???:0:0)",
-"0x55c587993956: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
-"0x55c587f1f93d: <tl::inline::vec::InlineVecInner<tl::parser::handle::NodeHandle, 2>>::push (???:0:0)",
-"0x55c587f1d8bf: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x55c587f1ecf0: tl::parse (???:0:0)",
-"0x55c5879b4696: <tokio::runtime::park::CachedParkThread>::block_on::<schoolbot::main::{closure#0}> (???:0:0)",
-"0x55c587f1a858: <hashbrown::raw::RawTableInner>::fallible_with_capacity::<alloc::alloc::Global> (???:0:0)",
-"0x55c587f197a0: <hashbrown::raw::RawTable<(tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>)>>::reserve_rehash::<hashbrown::map::make_hasher<tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>, std::hash::random::RandomState>::{closure#0}> (???:0:0)",
-"0x55c587f1aeaa: <hashbrown::map::HashMap<tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>, std::hash::random::RandomState>>::insert (???:0:0)",
-"0x55c587f1dc79: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x55c587f1e51f: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x55c587993607: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
-"0x55c587993984: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
-"0x55c5879944e5: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
-"0x55c587994223: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
-"0x55c587994361: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
-"0x55c587f1d57f: <tl::parser::base::Parser>::new (???:0:0)",
-"0x55c587f1ece8: tl::parse (???:0:0)",
-"0x55c587f1e1b3: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x55c587f1fbad: <alloc::raw_vec::RawVecInner>::finish_grow (???:0:0)",
-"0x55c587f1fa8a: <alloc::raw_vec::RawVec<tl::parser::tag::Node>>::grow_one (???:0:0)",
-"0x55c587f1d85e: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x55c587f1fafa: <alloc::raw_vec::RawVec<tl::parser::handle::NodeHandle>>::grow_one (???:0:0)",
-"0x55c587f1d8de: <tl::parser::base::Parser>::parse (???:0:0)",
-"0x55c587f1dd11: <tl::parser::base::Parser>::parse (???:0:0)"
+"0x563972775c9c: <dhat::Alloc as core::alloc::global::GlobalAlloc>::alloc (???:0:0)",
+"0x56397274493d: <tl::inline::vec::InlineVecInner<tl::parser::handle::NodeHandle, 2>>::push (???:0:0)",
+"0x56397274351f: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x563972743cf0: tl::parse (???:0:0)",
+"0x5639721d9696: <tokio::runtime::park::CachedParkThread>::block_on::<schoolbot::main::{closure#0}> (???:0:0)",
+"0x56397273f858: <hashbrown::raw::RawTableInner>::fallible_with_capacity::<alloc::alloc::Global> (???:0:0)",
+"0x56397273e7a0: <hashbrown::raw::RawTable<(tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>)>>::reserve_rehash::<hashbrown::map::make_hasher<tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>, std::hash::random::RandomState>::{closure#0}> (???:0:0)",
+"0x56397273feaa: <hashbrown::map::HashMap<tl::bytes::Bytes, core::option::Option<tl::bytes::Bytes>, std::hash::random::RandomState>>::insert (???:0:0)",
+"0x563972742c79: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x5639721b9223: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
+"0x5639721d96d8: <tokio::runtime::park::CachedParkThread>::block_on::<schoolbot::main::{closure#0}> (???:0:0)",
+"0x563972742d11: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x563972744bad: <alloc::raw_vec::RawVecInner>::finish_grow (???:0:0)",
+"0x563972744afa: <alloc::raw_vec::RawVec<tl::parser::handle::NodeHandle>>::grow_one (???:0:0)",
+"0x5639727428de: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x5639721b9361: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
+"0x5639721c019b: <alloc::raw_vec::RawVecInner>::finish_grow (???:0:0)",
+"0x5639721bf3e4: <alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global> (???:0:0)",
+"0x5639721ad9bb: <alloc::vec::Vec<schoolbot::parsers::changes::Change>>::extend_trusted::<alloc::vec::drain::Drain<schoolbot::parsers::changes::Change>> (???:0:0)",
+"0x5639721b9959: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
+"0x5639721b94e5: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
+"0x5639727431b3: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x5639721b8607: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
+"0x5639721b8984: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
+"0x5639727f9175: <alloc::string::String as core::convert::From<alloc::borrow::Cow<str>>>::from (???:0:0)",
+"0x563972744f24: <tl::parser::tag::HTMLTag>::inner_text (???:0:0)",
+"0x5639721b8956: <schoolbot::parsers::changes::Parser>::changes (???:0:0)",
+"0x5639727428bf: <tl::parser::base::Parser>::parse (???:0:0)",
+"0x56397274257f: <tl::parser::base::Parser>::new (???:0:0)",
+"0x563972743ce8: tl::parse (???:0:0)",
+"0x563972744a8a: <alloc::raw_vec::RawVec<tl::parser::tag::Node>>::grow_one (???:0:0)",
+"0x56397274285e: <tl::parser::base::Parser>::parse (???:0:0)"
 ]
 }

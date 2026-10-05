@@ -61,6 +61,27 @@ impl Request {
         Ok(())
     }
 
+    pub fn encoding_type<'a>(buffer: &'a [u8]) -> (Option<&'a str>, bool) {
+        for line in buffer.split(|&byte| byte == b'\n') {
+            if line == b"\r" {
+                return (None, true);
+            };
+            let Ok(line) = str::from_utf8(line) else {
+                continue;
+            };
+            let mut header = line.split(": ");
+            let (Some(name), Some(value)) = (header.next(), header.next()) else {
+                continue;
+            };
+            if name != "Transfer-Encoding" {
+                continue;
+            };
+            info!("Transfer encoding is {}", value);
+            return (Some(value), false);
+        };
+        (None, false)
+    }
+
     /* pub fn blocking_plain_text(&mut self, buf: &mut [u8], start_at: Option<&[u8]>, stop_at: Option<&[u8]>) -> Result<usize, Error> {
         self.is_readed = true;
         let mut len = 0;
