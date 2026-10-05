@@ -1,101 +1,107 @@
-use std::{
-    env::var, mem::{forget, transmute}, slice::from_raw_parts, time::Duration,
-};
+#![no_std]
+#![no_main]
+#![feature(macro_metavar_expr)]
 
-use dhat::{Alloc, Profiler};
-use tokio::time::{Instant, sleep};
-use tracing::info;
+use core::{arch::asm, net::{Ipv4Addr, SocketAddrV4}, ops::RangeBounds};
 
-use crate::{
-    http::{HttpClient, Str}, parsers::{changes, lessons::{self, Lesson}, table::{self, ARRAY_LEN}},
-};
+use rustix::{fd::AsRawFd, io::{read, write}, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::Timeout}, time};
+use rustix_uring::{opcode, types};
 
-mod errors;
+use crate::{buffer::BigBuffer, http::{HttpClient, Request}, parsers::changes::{self, CHANGES_MARKER, START_CHANGES_MARKER, STOP_CHANGES_MARKER, WHITESPACES}, str::{trim, trim_mut, utf8_lossy}, syscalls::{align, exit, timestamp}};
+
+#[macro_use]
+mod log;
+mod syscalls;
+mod panic;
+mod essentials;
 mod http;
+mod errors;
+mod str;
+mod telegram;
 mod parsers;
+mod buffer;
 
-#[global_allocator]
-static ALLOC: Alloc = Alloc;
-
-#[tokio::main]
-async fn main() {
-    tracing_subscriber::fmt::init();
-    dotenvy::dotenv().unwrap();
-
-    let lessons_change_page = unsafe { env("LESSONS_CHANGES_PAGE") };
-    let http_client = HttpClient::new(lessons_change_page, "");
-
-    let document = unsafe {
-        Str::new(
-            http_client
-                .get_page_document(lessons_change_page)
-                .await
-                .unwrap(),
-        )
-    }
-    .unwrap();
-
-    let profiler = Profiler::new_heap();
-    let time = Instant::now();
-
-    let parser = changes::Parser::new(&document);
-    let changes = parser.changes();
-    drop(profiler);
-
-    info!(
-        "Parsed changes: {:?} in {}ns",
-        changes,
-        time.elapsed().as_nanos()
-    );
-
-    for change in changes {
-        println!("{}", change.title);
-        for row in change.change_data {
-            for block in row {
-                print!("{}\t", block);
-            }
-            println!();
-        }
-    }
-
-    let content = unsafe {
-        http_client
-            .get_page_document("https://419.spb.ru/f/2026-deti_s_28_sent.xls")
-            .await
-    }
-    .unwrap();
-
-    info!("content len: {}", content.len());
-    let time = Instant::now();
-    let mut lessons = lessons::Parser::new();
-    unsafe { lessons.reparse(&content).unwrap() };
-    drop(content);
-    lessons.get_by_class("11а");
-    info!("Parsed lessons in {}ns", time.elapsed().as_nanos());
-    info!("Lessons len: {} bytes", lessons.lessons.iter().flatten().flatten().count() * std::mem::size_of::<Lesson>());
-
-    let table_ = table::table().lock();
-    info!("Table len: {}/{} bytes ({}%)", table_.len, ARRAY_LEN, table_.len as f32 / ARRAY_LEN as f32 * 100.);
-    let mut slice = &table_.data[..table_.len];
-    let mut count: u8 = 0;
+fn main() -> ! {
+    let mut client = HttpClient::new("", "");
+    let Ok(mut request) = client.get("/novosti/news_post/izmeneniya-raspisaniya", "419.spb.ru", 1000).inspect_err(|e| {
+        error!("Error: {}", e);
+    }) else {
+        exit(1);
+    };
+    client.wait().unwrap();
+    info!("Sent");
+    let cqe = client.ring.completion().next().unwrap();
+    info!("Sent {:?} bytes", cqe.result().unwrap());
+    let mut buffer = [0u8; 1024];
+    let mut state = State::NotReady;
+    let mut big_buffer = BigBuffer::new();
+    let mut is_headers = true;
+    let mut start_time = None;
+    let mut total_time = 0;
+    let mut tbody_id = 0;
     loop {
-        let _ = table::read_u8(&mut slice);
-        let len = table::read_u8(&mut slice);
-        let (_, rslice) = slice.split_at(len as usize);
-        slice = rslice;
-        count += 1;
-        if slice.is_empty() {
+        if let Some(start_time) = start_time {
+            total_time += timestamp() - start_time;
+        };
+        request.next(&mut buffer, &mut client.ring).unwrap();
+        client.wait().unwrap();
+        let cqe = client.ring.completion().next().unwrap();
+        let len = cqe.result().unwrap() as usize;
+        if len == 0 || buffer[..len].ends_with(b"0\r\n\r\n") {
+            break;
+        };
+        start_time = Some(timestamp());
+        
+        big_buffer.update(buffer, len);
+
+        if is_headers && let (Some(encoding), is_ended) = Request::encoding_type(&buffer) {
+            big_buffer.is_chunked = encoding == "chunked\r";
+            is_headers = !is_ended;
+        };
+
+        if let Some(start_index) = changes::Parser::find(&big_buffer.buffer[..big_buffer.len], START_CHANGES_MARKER) {
+            big_buffer.move_buffer(start_index, 0);
+            state = State::Ready;
+        };
+
+        if let Some(stop_index) = changes::Parser::find(&big_buffer.buffer[..big_buffer.len], STOP_CHANGES_MARKER) {
+            big_buffer.len = stop_index;
+            state = State::Ended;
+        };
+
+        if state == State::NotReady {
+            continue;
+        };
+
+        if let Some(columns) = changes::Parser::colgroup(&mut big_buffer) {
+            info!("Columns: {}", columns);
+        };
+        if let Some(position) = big_buffer.buffer[..big_buffer.len].windows(b"<tbody>".len()).position(|bytes| bytes == b"<tbody>") {
+            big_buffer.move_buffer(position + b"<tbody>".len(), 0);
+            tbody_id += 1;
+        };
+
+        if let Some(title_frament) = changes::Parser::title_fragment(&mut big_buffer) {
+            info!("[{}] result {}", tbody_id, utf8_lossy(title_frament, false).unwrap());
+        };
+
+        if state == State::Ended {
             break;
         };
     };
-    info!("Table elements count: {}/256 ({}%)", count, count as f32 / 256. * 100.);
+    info!("Parsed in {}ns", total_time);
+    exit(0);
 }
 
-unsafe fn env(env_name: &'static str) -> &'static str {
-    let page = var(env_name).unwrap();
-    let (ptr, len) = (page.as_ptr(), page.len());
-    unsafe {
-        forget(page);
-        transmute(from_raw_parts(ptr, len))
-    }
+#[derive(PartialEq)]
+pub enum State {
+    NotReady,
+    Ready,
+    Ended,
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn _start() -> ! {
+    align(main);
+    exit(0);
 }
