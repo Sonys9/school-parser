@@ -75,27 +75,14 @@ fn main() -> ! {
 
         if let Some(columns) = changes::Parser::colgroup(&mut big_buffer) {
             info!("Columns: {}", columns);
-            continue;
         };
         if let Some(position) = big_buffer.buffer[..big_buffer.len].windows(b"<tbody>".len()).position(|bytes| bytes == b"<tbody>") {
             big_buffer.move_buffer(position + b"<tbody>".len(), 0);
             tbody_id += 1;
         };
 
-        loop {
-            let Some(index) = big_buffer.buffer[..big_buffer.len].iter().position(|&byte| byte == b'\n') else {
-                break;
-            };
-            let line = &mut big_buffer.buffer[..index];
-            if line.windows(CHANGES_MARKER.len()).position(|bytes| bytes == CHANGES_MARKER).is_none() {
-                big_buffer.move_buffer(index + 1, 0);
-                continue;
-            };
-            let Some((slice, start_pos, _)) = changes::Parser::get_element(&mut big_buffer, b"text-decoration:none\">", b"<") else {
-                break;
-            };
-            info!("[{}] result {}", tbody_id, utf8_lossy(slice, false).unwrap());
-            big_buffer.move_buffer(start_pos + b"text-decoration:none\">".len(), 0);
+        if let Some(title_frament) = changes::Parser::title_fragment(&mut big_buffer) {
+            info!("[{}] result {}", tbody_id, utf8_lossy(title_frament, false).unwrap());
         };
 
         if state == State::Ended {

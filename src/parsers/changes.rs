@@ -30,7 +30,7 @@ impl Parser {
     }
 
     pub fn colgroup(big_buffer: &mut BigBuffer) -> Option<u8> {
-        let Some((colgroup, _, end_pos)) = Self::get_element(big_buffer, START_CHANGES_MARKER, STOP_CHANGES_MARKER) else {
+        let Some((colgroup, _, end_pos)) = Self::get_element(big_buffer, COLGROUP_START, COLGROUP_END) else {
             return None;
         };
         let mut count = 0;
@@ -59,6 +59,26 @@ impl Parser {
         };
         big_buffer.move_buffer(start, 0);
         Some(count)
+    }
+    
+    pub fn title_fragment(big_buffer: &mut BigBuffer) -> Option<&mut [u8]> {
+        loop {
+            let Some(index) = big_buffer.buffer[..big_buffer.len].iter().position(|&byte| byte == b'\n') else {
+                break;
+            };
+            let line = &mut big_buffer.buffer[..index];
+            if line.windows(CHANGES_MARKER.len()).position(|bytes| bytes == CHANGES_MARKER).is_none() {
+                big_buffer.move_buffer(index + 1, 0);
+                continue;
+            };
+            let Some((slice, start_pos, _)) = Self::get_element(big_buffer, b"text-decoration:none\">", b"<") else {
+                break;
+            };
+            let len = slice.len();
+            big_buffer.move_buffer(start_pos + b"text-decoration:none\">".len(), 0);
+            return Some(&mut big_buffer.buffer[..len]);
+        };
+        None
     }
 
     #[inline]
