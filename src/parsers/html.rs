@@ -24,7 +24,7 @@ impl Parser {
                 count += 1;
             };
         };
-        big_buffer.move_buffer(end_pos + COLGROUP_END.len());
+        big_buffer.move_buffer(end_pos + COLGROUP_END.len(), 0);
         Some(count)
     }
 }
