@@ -97,12 +97,14 @@ pub unsafe extern "C" fn main() -> ! {
             continue;
         };
 
-        terminal!("{:?}\n\n", utf8_lossy(&mut big_buffer.buffer[..big_buffer.len], false).unwrap());
+        // terminal!("{:?}\n\n", utf8_lossy(&mut big_buffer.buffer[..big_buffer.len], false).unwrap());
         //terminal!("{:?}\n", stringify);
         
-        // if let Some(columns) = html::Parser::colgroup(&mut big_buffer) {
-            //info!("Columns: {}", columns);
-        // };
+        if let Some(columns) = html::Parser::colgroup(&mut big_buffer) {
+            info!("Columns: {}", columns);
+        };
+
+        // terminal!("{:?}\n\n", utf8_lossy(&mut big_buffer.buffer[..big_buffer.len], false).unwrap());
 
         if state == State::Ended {
             break;

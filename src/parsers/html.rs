@@ -24,7 +24,13 @@ impl Parser {
                 count += 1;
             };
         };
-        big_buffer.move_buffer(end_pos + COLGROUP_END.len(), 0);
+        let start = end_pos + COLGROUP_END.len();
+        if start > big_buffer.len {
+            return None;
+        };
+        info!("moving {} to {}", start, 0);
+        big_buffer.move_buffer(start, 0);
+        info!("new len: {}", big_buffer.len);
         Some(count)
     }
 }
