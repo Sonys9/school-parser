@@ -7,7 +7,7 @@ use core::{arch::asm, net::{Ipv4Addr, SocketAddrV4}, ops::RangeBounds};
 use rustix::{fd::AsRawFd, io::{read, write}, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::Timeout}, time};
 use rustix_uring::{opcode, types};
 
-use crate::{buffer::BigBuffer, http::{HttpClient, Request}, parsers::changes::{self, CHANGES_MARKER, START_CHANGES_MARKER, STOP_CHANGES_MARKER, WHITESPACES}, str::{trim, trim_mut, utf8_lossy}, syscalls::{align, exit, timestamp}};
+use crate::{buffer::BigBuffer, http::{HttpClient, Request}, parsers::changes::{self, CHANGES_MARKER, START_CHANGES_MARKER, STOP_CHANGES_MARKER, TBODY_START_MARKER, TD_END_MARKER, TD_START_MARKER, TR_START_MARKER, WHITESPACES}, str::{trim, trim_mut, utf8_lossy}, syscalls::{align, exit, timestamp}};
 
 #[macro_use]
 mod log;
@@ -39,6 +39,7 @@ fn main() -> ! {
     let mut start_time = None;
     let mut total_time = 0;
     let mut tbody_id = 0;
+    let mut tr_id = 0;
     loop {
         if let Some(start_time) = start_time {
             total_time += timestamp() - start_time;
@@ -52,6 +53,7 @@ fn main() -> ! {
         };
         start_time = Some(timestamp());
         
+        // terminal!("===========================\n{}", utf8_lossy(&mut buffer[..len], false).unwrap());
         big_buffer.update(buffer, len);
 
         if is_headers && let (Some(encoding), is_ended) = Request::encoding_type(&buffer) {
@@ -74,15 +76,30 @@ fn main() -> ! {
         };
 
         if let Some(columns) = changes::Parser::colgroup(&mut big_buffer) {
-            info!("Columns: {}", columns);
+            info!("Columns: {}", columns); 
         };
-        if let Some(position) = big_buffer.buffer[..big_buffer.len].windows(b"<tbody>".len()).position(|bytes| bytes == b"<tbody>") {
-            big_buffer.move_buffer(position + b"<tbody>".len(), 0);
+        if let Some(position) = big_buffer.buffer[..big_buffer.len].windows(TBODY_START_MARKER.len()).position(|bytes| bytes == TBODY_START_MARKER) {
+            big_buffer.move_buffer(position + TBODY_START_MARKER.len(), 0);
             tbody_id += 1;
+            tr_id = 0;
         };
 
-        if let Some(title_frament) = changes::Parser::title_fragment(&mut big_buffer) {
-            info!("[{}] result {}", tbody_id, utf8_lossy(title_frament, false).unwrap());
+        let mut tr_pos = None;
+        loop {
+            if let Some(position) = big_buffer.buffer[..big_buffer.len].windows(TR_START_MARKER.len()).position(|bytes| bytes == TR_START_MARKER) {
+                tr_pos = Some(position);
+            };
+
+            let Some((text, start_pos)) = changes::Parser::extract_span(&mut big_buffer) else {
+                break;
+            };
+            if let Some(position) = tr_pos {
+                if position < start_pos {
+                    tr_id += 1;
+                    tr_pos = None;
+                };
+            };
+            info!("[{} at tr {}] result {}", tbody_id, tr_id, utf8_lossy(text, false).unwrap());
         };
 
         if state == State::Ended {
