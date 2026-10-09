@@ -1,5 +1,7 @@
 use crate::parsers::changes::{DELIMITER, DELIMITER_LEN};
 
+pub const TCP_BUFFER_LEN: usize = 1024 - 128;
+
 pub struct BigBuffer {
     pub buffer: [u8; 1024 * 2],
     pub len: usize,
@@ -15,7 +17,7 @@ impl BigBuffer {
         }
     }
 
-    pub fn update(&mut self, buffer: [u8; 1024], len: usize) {
+    pub fn update(&mut self, buffer: [u8; TCP_BUFFER_LEN], len: usize) {
         let clean_buffer = &buffer[..len];
         self.len = if 2048 - self.len < len {
             let diff = self.len + len - 2048;

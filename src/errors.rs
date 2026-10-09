@@ -11,4 +11,7 @@ pub enum Error {
 
     #[error("Ring is full: {0}")]
     Push(#[from] rustix_uring::squeue::PushError),
+
+    #[error("Failed to parse the number")]
+    NumParse(#[from] core::num::ParseIntError)
 }

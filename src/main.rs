@@ -17,9 +17,15 @@ use rustix::{
 use rustix_uring::{opcode, types};
 
 use crate::{
-    buffer::BigBuffer, http::{HttpClient, Request}, parsers::changes::{
-        self, CHANGES_MARKER, START_CHANGES_MARKER, STOP_CHANGES_MARKER, TBODY_START_MARKER, TD_END_MARKER, TD_START_MARKER, TEXT_CLOSE_MARKER, TR_START_MARKER, WHITESPACES,
-    }, str::{trim, trim_mut, utf8_lossy}, syscalls::{align, exit, timestamp},
+    buffer::{BigBuffer, TCP_BUFFER_LEN},
+    http::{HttpClient, Request},
+    parsers::changes::{
+        self, CHANGES_MARKER, START_CHANGES_MARKER, STOP_CHANGES_MARKER, TBODY_START_MARKER,
+        TBODY_STOP_MARKER, TD_END_MARKER, TD_START_MARKER, TEXT_CLOSE_MARKER, TR_START_MARKER,
+        WHITESPACES,
+    },
+    str::{trim, trim_mut, utf8_lossy},
+    syscalls::{align, exit, timestamp},
 };
 
 #[macro_use]
@@ -52,7 +58,7 @@ fn main() -> ! {
     info!("Sent");
     let cqe = client.ring.completion().next().unwrap();
     info!("Sent {:?} bytes", cqe.result().unwrap());
-    let mut buffer = [0u8; 1024];
+    let mut buffer = [0u8; TCP_BUFFER_LEN];
     let mut state = State::NotReady;
     let mut big_buffer = BigBuffer::new();
     let mut is_headers = true;
@@ -100,18 +106,25 @@ fn main() -> ! {
         };
 
         if let Some(columns) = changes::Parser::colgroup(&mut big_buffer) {
-            info!("Columns: {}", columns);
+            // info!("Columns: {}", columns);
         };
         if let Some(position) = big_buffer.buffer[..big_buffer.len]
             .windows(TBODY_START_MARKER.len())
             .position(|bytes| bytes == TBODY_START_MARKER)
         {
+            state = State::Ready;
             big_buffer.move_buffer(position + TBODY_START_MARKER.len(), 0);
             tbody_id += 1;
             tr_id = 0;
+            terminal!("\n");
+        };
+
+        if state == State::WaitingForTbody {
+            continue;
         };
 
         let mut tr_pos = None;
+        let mut tbody_end_pos = None;
         loop {
             if let Some(position) = big_buffer.buffer[..big_buffer.len]
                 .windows(TR_START_MARKER.len())
@@ -119,32 +132,60 @@ fn main() -> ! {
             {
                 tr_pos = Some(position);
             };
-
-            // info!("{}", utf8_lossy(&mut big_buffer.buffer[..big_buffer.len], false).unwrap());
+            if let Some(position) = big_buffer.buffer[..big_buffer.len]
+                .windows(TBODY_STOP_MARKER.len())
+                .position(|bytes| bytes == TBODY_STOP_MARKER)
+            {
+                tbody_end_pos = Some(position);
+            };
+            let Some((td, start_pos)) = changes::Parser::extract_td(&mut big_buffer) else {
+                // info!("cant get any text buffer is {:?}", utf8_lossy(&mut big_buffer.buffer[..big_buffer.len], false).unwrap());
+                break;
+            };
+            for mut pair in trim_mut(td, WHITESPACES)
+                .split(|&byte| byte == b' ')
+                .map(|bytes| bytes.split(|&byte| byte == b'='))
+            {
+                let (Some(key), Some(value)) = (
+                    pair.next().map(|key| trim(key, &[b'"'])),
+                    pair.next().map(|key| trim(key, &[b'"'])),
+                ) else {
+                    continue;
+                };
+                if key != b"rowspan" {
+                    continue;
+                };
+                info!("rowspan is {}", str::from_utf8(value).unwrap().parse::<i8>().unwrap());
+            };
             let Some((text, start_pos)) = changes::Parser::extract_span(&mut big_buffer) else {
+                // info!("cant get any text buffer is {:?}", utf8_lossy(&mut big_buffer.buffer[..big_buffer.len], false).unwrap());
                 break;
             };
             if let Some(position) = tr_pos {
                 if position < start_pos {
                     tr_id += 1;
                     tr_pos = None;
+                    terminal!("\n");
                 };
             };
-            info!(
-                "[{} at tr {}] result {}",
-                tbody_id,
-                tr_id,
-                utf8_lossy(text, false).unwrap()
-            );
+            if let Some(tbody_end_pos) = tbody_end_pos {
+                // info!("tbody end pos: {} start pos: {}", tbody_end_pos, start_pos);
+                if tbody_end_pos < start_pos {
+                    state = State::WaitingForTbody;
+                    break;
+                };
+            };
+            terminal!("{:?}\t", utf8_lossy(text, false).unwrap());
             // info!("{}", utf8_lossy(&mut big_buffer.buffer[..big_buffer.len], false).unwrap());
             let text_len = text.len();
-            big_buffer.move_buffer(text_len + TEXT_CLOSE_MARKER.len(), 0);
+            big_buffer.move_buffer(start_pos + text_len + TEXT_CLOSE_MARKER.len(), 0);
         }
 
         if state == State::Ended {
             break;
         };
     }
+    terminal!("\n");
     info!("Parsed in {}ns", total_time);
     exit(0);
 }
@@ -154,6 +195,7 @@ pub enum State {
     NotReady,
     Ready,
     Ended,
+    WaitingForTbody,
 }
 
 #[unsafe(no_mangle)]
