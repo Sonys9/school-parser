@@ -5,7 +5,7 @@ static mut STACK: [u8; 1024 * LEN] = [0u8; 1024 * LEN];
 
 #[allow(static_mut_refs)]
 pub fn align(func: fn() -> !) {
-    unsafe { 
+    unsafe {
         asm!(
             "mov rdi, rsp",
             "mov rsp, {stack_top}",

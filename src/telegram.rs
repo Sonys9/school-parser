@@ -1,4 +1,2 @@
 #[derive(Default)]
-pub struct Message {
-    
-}
+pub struct Message {}

@@ -1,6 +1,20 @@
-use core::{ffi::c_void, net::{Ipv4Addr, SocketAddrV4}, time::Duration};
+use core::{
+    ffi::c_void,
+    net::{Ipv4Addr, SocketAddrV4},
+    time::Duration,
+};
 
-use rustix::{fd::{AsRawFd, OwnedFd}, io::{IoSlice, close, read, write, writev}, io_uring::iovec, net::{AddressFamily, SocketType, connect, ipproto::TCP, socket, sockopt::{Timeout, set_socket_timeout}}};
+use rustix::{
+    fd::{AsRawFd, OwnedFd},
+    io::{IoSlice, close, read, write, writev},
+    io_uring::iovec,
+    net::{
+        AddressFamily, SocketType, connect,
+        ipproto::TCP,
+        socket,
+        sockopt::{Timeout, set_socket_timeout},
+    },
+};
 use rustix_uring::{IoUring, opcode, types};
 
 use crate::errors::Error;
@@ -8,7 +22,7 @@ use crate::errors::Error;
 pub struct HttpClient {
     lessons_change_page: &'static str,
     lessons_page: &'static str,
-    pub ring: IoUring
+    pub ring: IoUring,
 }
 
 impl HttpClient {
@@ -17,7 +31,7 @@ impl HttpClient {
         Self {
             lessons_change_page,
             lessons_page,
-            ring
+            ring,
         }
     }
 
@@ -35,11 +49,19 @@ impl HttpClient {
             iovec::new(target.as_bytes()),
             iovec::new(b"\r\n\r\n"),
         ];
-        let write_e = opcode::Writev::new(types::Fd(fd.as_raw_fd()), buffers.as_ptr(), buffers.len() as u32).build();
-        unsafe { 
+        let write_e = opcode::Writev::new(
+            types::Fd(fd.as_raw_fd()),
+            buffers.as_ptr(),
+            buffers.len() as u32,
+        )
+        .build();
+        unsafe {
             self.ring.submission().push(&write_e)?;
         };
-        Ok(Request { fd, is_readed: false })
+        Ok(Request {
+            fd,
+            is_readed: false,
+        })
     }
 
     pub fn wait(&self) -> Result<usize, Error> {
@@ -49,12 +71,17 @@ impl HttpClient {
 
 pub struct Request {
     pub fd: OwnedFd,
-    is_readed: bool
+    is_readed: bool,
 }
 
 impl Request {
     pub fn next(&mut self, buffer: &mut [u8], ring: &mut IoUring) -> Result<(), Error> {
-        let read_e = opcode::Read::new(types::Fd(self.fd.as_raw_fd()), buffer.as_mut_ptr(), buffer.len() as u32).build();
+        let read_e = opcode::Read::new(
+            types::Fd(self.fd.as_raw_fd()),
+            buffer.as_mut_ptr(),
+            buffer.len() as u32,
+        )
+        .build();
         unsafe {
             ring.submission().push(&read_e)?;
         };
@@ -78,7 +105,7 @@ impl Request {
             };
             info!("Transfer encoding is {}", value);
             return (Some(value), false);
-        };
+        }
         (None, false)
     }
 
@@ -118,7 +145,9 @@ impl Request {
 }
 
 fn try_find(buf: &[u8], len: usize, readed: usize, query: &[u8]) -> Option<usize> {
-    buf[..len + readed].windows(query.len()).position(|win| win == query)
+    buf[..len + readed]
+        .windows(query.len())
+        .position(|win| win == query)
 }
 
 trait New {
@@ -127,6 +156,9 @@ trait New {
 
 impl New for iovec {
     fn new(data: &[u8]) -> Self {
-        Self { iov_base: data.as_ptr() as *mut c_void, iov_len: data.len() }
+        Self {
+            iov_base: data.as_ptr() as *mut c_void,
+            iov_len: data.len(),
+        }
     }
 }

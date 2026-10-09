@@ -18,10 +18,10 @@ fn trim_indexes<'a>(by: &'a [u8], using: &[u8]) -> (usize, usize) {
     let (mut start, mut end) = (0, by.len());
     while start < end && using.contains(&by[start]) {
         start += 1;
-    };
+    }
     while end > start && using.contains(&by[end - 1]) {
         end -= 1;
-    };
+    }
     (start, end)
 }
 

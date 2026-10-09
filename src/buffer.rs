@@ -36,23 +36,28 @@ impl BigBuffer {
         while let Some(index) = self.get_delimiter() {
             is_size = !is_size;
             let mut stop_index = None;
-            for (i, bytes) in self.buffer[index + DELIMITER_LEN..self.len].windows(2).enumerate() {
+            for (i, bytes) in self.buffer[index + DELIMITER_LEN..self.len]
+                .windows(2)
+                .enumerate()
+            {
                 if bytes == DELIMITER.as_bytes() {
                     stop_index = Some(i);
                     break;
                 };
-            };
+            }
             let Some(stop_index) = stop_index else {
                 break;
             };
             let total_len = DELIMITER_LEN + stop_index + DELIMITER_LEN;
             self.move_buffer(index + total_len, index);
-        };
+        }
     }
 
     #[inline]
     fn get_delimiter(&mut self) -> Option<usize> {
-        self.buffer[..self.len].windows(2).position(|bytes| bytes == b"\r\n")
+        self.buffer[..self.len]
+            .windows(2)
+            .position(|bytes| bytes == b"\r\n")
     }
 
     #[inline]
